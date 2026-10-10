@@ -20,7 +20,7 @@ Masalahnya jarang soal niat. Orang yang mau berbagi tidak tahu harus memberi ke 
 
 ### Mendaftar dengan KTP
 
-Pengguna baru memotret KTP. Aplikasi membaca data di kartu itu dan mengisi formulir pendaftaran. Pengguna tinggal memeriksa hasilnya dan memperbaiki kalau ada yang salah baca.
+Pengguna baru memotret KTP. Aplikasi membaca data di kartu itu dan mengisi formulir pendaftaran. Pengguna tinggal memeriksa hasilnya dan memperbaiki kalau ada yang salah baca. Yang diketik sendiri hanya nomor HP dan lokasi. Setelah itu pengguna masuk dengan nomor HP dan kode OTP, tanpa kata sandi.
 
 Verifikasi ini ada supaya donatur dan penerima sama-sama orang sungguhan, dan satu orang tidak mendaftar berkali-kali.
 
@@ -91,4 +91,4 @@ app/src/main/java/com/sempatapps/
 
 ## Tim
 
-Kelompok 6.
+Kelompok 6. Pembagian kerja per fitur ada di [PEMBAGIAN-TUGAS.md](PEMBAGIAN-TUGAS.md).
