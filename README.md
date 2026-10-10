@@ -1,103 +1,94 @@
-# 🍱 SempatApps (SEMPAT)
-> **S**elamatkan **E**nergi & **M**akanan, **P**eduli **A**ntar **T**etangga  
-> *Smart Food Surplus Rescue & Donation Platform powered by Kotlin & AI Camera*
+# Sempat
 
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.0+-7F52FF.svg?logo=kotlin&logoColor=white)](https://kotlinlang.org)
-[![Android](https://img.shields.io/badge/Platform-Android-3DDC84.svg?logo=android&logoColor=white)](https://developer.android.com)
-[![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4.svg?logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
-[![AI Powered](https://img.shields.io/badge/AI-Vision%20%26%20Camera-FF6F00.svg?logo=google&logoColor=white)](https://ai.google.dev/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+Sempat adalah aplikasi Android untuk menyalurkan makanan berlebih kepada orang yang membutuhkan. Donatur memotret makanannya, aplikasi mengenali jenis makanan itu dan mengisi formulir donasi, lalu penerima di sekitar bisa mengajukan pengambilan. Semua makanan dibagikan gratis. Tidak ada jual beli di aplikasi ini.
 
----
+Nama Sempat diambil dari "Selamatkan Energi dan Makanan, Peduli Antar Tetangga".
 
-## 📌 Latar Belakang & Visi (Vision & Purpose)
+![Platform](https://img.shields.io/badge/platform-Android-3DDC84)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.0%2B-7F52FF)
+![UI](https://img.shields.io/badge/UI-Jetpack%20Compose-4285F4)
 
-Di satu sisi, setiap hari berton-ton makanan layak konsumsi dari restoran, toko roti, katering, supermarket, maupun rumah tangga terbuang sia-sia (*food surplus / food waste*). Di sisi lain, masih banyak saudara-saudara kita yang mengalami kesulitan mendapatkan asupan makanan harian.
+Status: tahap rancangan. Repo ini baru berisi konsep dan rencana pengembangan. Kode aplikasinya menyusul.
 
-**SempatApps** hadir sebagai jembatan sosial berbasis teknologi:
-1. **Mencegah Food Waste**: Membantu pelaku usaha & individu mendistribusikan kelebihan makanan layak makan sebelum terbuang.
-2. **Menuntaskan Kelaparan**: Memudahkan masyarakat prasejahtera, panti asuhan, dan relawan mendapatkan akses makanan gratis atau bersubsidi secara bermartabat.
-3. **Pencatatan Cerdas dengan AI Camera**: Pengguna tidak perlu repot mengetik detail makanan; cukup foto makanan, AI akan langsung mendeteksi jenis makanan, porsi, perkiraan masa simpan, dan membuatkan draf donasi otomatis.
+## Latar belakang
 
----
+Restoran, toko roti, katering, dan rumah tangga sering punya makanan yang masih layak tetapi tidak habis. Makanan itu biasanya berakhir di tempat sampah, padahal di lingkungan yang sama ada orang yang kesulitan makan hari itu.
 
-## ✨ Fitur Utama (Core Features)
+Masalahnya jarang soal niat. Orang yang mau berbagi tidak tahu harus memberi ke siapa, dan mengumumkan donasi satu per satu itu merepotkan. Sempat dibuat supaya membagikan makanan cukup dengan satu foto.
 
-### 📸 1. AI Camera Smart Food Listing
-- **Instant Food Recognition**: Cukup arahkan kamera ke makanan surplus (sayur, roti, nasi kotak, buah, dll.).
-- **Auto-Fill Details**: Model AI otomatis mengenali nama makanan, kategori, estimasi porsi, dan rekomendasi tanggal kedaluwarsa/kelayakan.
-- **Safety & Freshness Check**: AI memberikan indikator panduan apakah makanan masih layak dibagikan.
+## Cara kerja
 
-### 🎁 2. Fitur Donasi & Rescue (Donation & Rescue Marketplace)
-- **100% Free Donation**: Donasi langsung makanan gratis untuk yang membutuhkan atau organisasi sosial.
-- **Rescue Surprise Bag**: Pilihan bagi resto/toko roti menjual paket surplus berkualitas dengan potongan harga besar (rescue bag).
-- **Scheduled Pickup & Delivery**: Sistem penjadwalan pengambilan makanan agar tetap higienis dan tepat waktu.
+### Mendaftar dengan KTP
 
-### 📍 3. Peta Terdekat & Notifikasi Real-time (Nearby Geolocation)
-- Peta interaktif berbasis lokasi untuk menemukan donasi makanan terdekat.
-- Notifikasi push langsung saat ada donatur membagikan makanan di radius sekitar pengguna/relawan.
+Pengguna baru memotret KTP. Aplikasi membaca data di kartu itu dan mengisi formulir pendaftaran. Pengguna tinggal memeriksa hasilnya dan memperbaiki kalau ada yang salah baca.
 
-### 🤝 4. Verifikasi Komunitas & Relawan (NGO & Volunteer Network)
-- Jalur khusus untuk panti asuhan, lembaga amal, dan komunitas sosial terverifikasi untuk mengklaim donasi dalam jumlah besar.
-- Sistem reputasi donatur dan penerima untuk menjaga kebersihan dan ketertiban.
+Verifikasi ini ada supaya donatur dan penerima sama-sama orang sungguhan, dan satu orang tidak mendaftar berkali-kali.
 
-### 🌱 5. Impact Tracker (Jejak Kebaikan & Lingkungan)
-- Melacak total kilogram makanan yang berhasil diselamatkan.
-- Mengkalkulasi reduksi emisi karbon (CO₂e) yang dicegah dari pembuangan sampah organik.
-- Total porsi makanan yang tersalurkan kepada penerima manfaat.
+### Membagikan makanan
 
----
+1. Donatur memotret makanan yang mau dibagikan.
+2. Aplikasi mengenali jenis makanannya dan mengisi nama serta kategori di formulir donasi.
+3. Donatur melengkapi jumlah porsi, batas waktu pengambilan, dan lokasi, lalu mengirimnya.
 
-## 🏗️ Arsitektur & Tech Stack
+### Menerima makanan
 
-Aplikasi ini dikembangkan menggunakan standar modern Android Development:
+Penerima melihat daftar donasi yang masih tersedia, memilih yang lokasinya terjangkau, lalu mengajukan pengambilan. Makanan diambil langsung di lokasi donatur sebelum batas waktunya habis.
+
+## AI berjalan di HP
+
+Pembacaan KTP dan pengenalan makanan dijalankan di HP pengguna. Fotonya tidak dikirim ke server untuk diproses.
+
+Ada dua alasan. Pertama, foto KTP adalah data pribadi, jadi lebih aman kalau tidak meninggalkan perangkat. Kedua, fitur ini tetap bisa dipakai saat sinyal buruk, dan itu sering terjadi justru di tempat orang paling membutuhkan aplikasi ini.
+
+Rencana teknisnya:
+
+| Fitur | Pendekatan |
+| --- | --- |
+| Baca KTP | Pengenalan teks ML Kit yang berjalan di perangkat, lalu pemilahan kolom KTP |
+| Kenali makanan | Model klasifikasi gambar TensorFlow Lite |
+
+Hasil AI selalu bisa diubah pengguna sebelum disimpan. Model bisa salah, terutama pada foto yang gelap atau buram.
+
+## Tech stack
+
+| Bagian | Teknologi |
+| --- | --- |
+| Bahasa | Kotlin 2.0+ |
+| UI | Jetpack Compose, Material 3 |
+| Arsitektur | MVVM |
+| Kamera | CameraX |
+| AI di perangkat | ML Kit Text Recognition, TensorFlow Lite |
+| Penyimpanan lokal | Room, DataStore |
+| Backend | Belum diputuskan |
+
+## Struktur project
+
+Susunan yang direncanakan:
 
 ```
-SempatApps/
-├── app/
-│   ├── src/main/java/com/sempatapps/
-│   │   ├── core/               # Theme, common utilities, base components
-│   │   ├── data/               # Repositories, API services, Room DB, DTOs
-│   │   ├── domain/             # Use cases, domain models, repository interfaces
-│   │   ├── presentation/       # Jetpack Compose UI (Screens, ViewModels, States)
-│   │   │   ├── camera/         # AI Camera capture & recognition preview
-│   │   │   ├── home/           # Feed of food donations & rescue items
-│   │   │   ├── donation/       # Create donation, claim flow, tracking
-│   │   │   ├── map/            # Nearby food radar & pickup points
-│   │   │   └── profile/        # Impact stats & user settings
-│   │   └── di/                 # Dependency injection modules (Hilt)
+app/src/main/java/com/sempatapps/
+├── core/            Tema dan komponen bersama
+├── data/            Repository, database lokal, sumber data
+├── domain/          Model dan use case
+├── ai/              Pembaca KTP dan pengenal makanan
+└── presentation/
+    ├── auth/        Pendaftaran dengan KTP dan masuk
+    ├── home/        Daftar donasi yang tersedia
+    ├── donation/    Buat donasi, ajukan pengambilan, status
+    ├── camera/      Kamera dan pratinjau hasil AI
+    └── profile/     Akun dan riwayat
 ```
 
-| Layer | Teknologi |
-|---|---|
-| **Language** | Kotlin 2.0+ |
-| **UI Framework** | Jetpack Compose + Material Design 3 |
-| **Architecture** | MVVM + Clean Architecture |
-| **Asynchronous** | Kotlin Coroutines & Flow |
-| **Dependency Injection** | Dagger Hilt |
-| **AI / Computer Vision** | Google Gemini Multimodal API / ML Kit Vision |
-| **Camera** | CameraX |
-| **Networking** | Retrofit / Ktor Client + Kotlinx Serialization |
-| **Local Database** | Room Database + Preferences DataStore |
-| **Maps & Location** | Google Maps Compose / Play Services Location |
+## Rencana pengembangan
 
----
+- [x] Konsep dan rancangan antarmuka
+- [ ] Kerangka project Android (Gradle, Compose)
+- [ ] Pendaftaran dengan foto KTP
+- [ ] Kamera dan pengenalan makanan
+- [ ] Daftar donasi dan halaman detail
+- [ ] Pengajuan pengambilan dan serah terima
+- [ ] Donasi terdekat berdasarkan lokasi
 
-## 🚀 Rencana Pengembangan (Roadmap)
+## Tim
 
-- [x] **Inisialisasi Project & Konsep Arsitektur**
-- [ ] **Setup Skeleton Android Project (Gradle, Jetpack Compose, Hilt)**
-- [ ] **Modul CameraX + AI Vision (Gemini / ML Kit)**
-- [ ] **Screen Listing Donasi & Detail Makanan**
-- [ ] **Sistem Autentikasi (Donatur, Penerima, Organisasi Amal)**
-- [ ] **Integrasi Geolocation & Nearby Radar**
-- [ ] **Fitur Klaim Donasi & QR Code Handover**
-- [ ] **Dashboard Impact Tracker (Porsi Makanan & CO₂e)**
-
----
-
-## 👨‍💻 Kontribusi & Author
-
-Kelompo 6
----
-*Sempat: Setiap Makanan Punya Kesempatan*
+Kelompok 6.
