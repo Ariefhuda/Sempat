@@ -2,7 +2,7 @@
 
 Sempat adalah aplikasi Android untuk menyalurkan makanan berlebih kepada orang yang membutuhkan. Donatur memotret makanannya, aplikasi mengenali jenis makanan itu dan mengisi formulir donasi, lalu penerima di sekitar bisa mengajukan pengambilan. Semua makanan dibagikan gratis. Tidak ada jual beli di aplikasi ini.
 
-Nama Sempat diambil dari "Selamatkan Energi dan Makanan, Peduli Antar Tetangga".
+"Setiap Makanan Punya KeSEMPATan"
 
 ![Platform](https://img.shields.io/badge/platform-Android-3DDC84)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.0%2B-7F52FF)
