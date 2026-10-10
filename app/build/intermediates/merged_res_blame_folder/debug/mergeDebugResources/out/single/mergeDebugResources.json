@@ -1,0 +1,70 @@
+[
+    {
+        "merged": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-debug-3:\\drawable_icon_profile.png.flat",
+        "source": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-main-5:\\drawable\\icon_profile.png"
+    },
+    {
+        "merged": "com.sempatapps.app-debug-3:/drawable_ic_bell.xml.flat",
+        "source": "com.sempatapps.app-main-5:/drawable/ic_bell.xml"
+    },
+    {
+        "merged": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-debug-3:\\drawable_donation_illustration.png.flat",
+        "source": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-main-5:\\drawable\\donation_illustration.png"
+    },
+    {
+        "merged": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-debug-3:\\drawable_recipient_hero.png.flat",
+        "source": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-main-5:\\drawable\\recipient_hero.png"
+    },
+    {
+        "merged": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-debug-3:\\drawable_sempat_logo.png.flat",
+        "source": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-main-5:\\drawable\\sempat_logo.png"
+    },
+    {
+        "merged": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-debug-3:\\drawable_bread_photo.png.flat",
+        "source": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-main-5:\\drawable\\bread_photo.png"
+    },
+    {
+        "merged": "com.sempatapps.app-debug-3:/drawable_ic_profile.xml.flat",
+        "source": "com.sempatapps.app-main-5:/drawable/ic_profile.xml"
+    },
+    {
+        "merged": "com.sempatapps.app-debug-3:/drawable_ic_home.xml.flat",
+        "source": "com.sempatapps.app-main-5:/drawable/ic_home.xml"
+    },
+    {
+        "merged": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-debug-3:\\drawable_seller_hero.png.flat",
+        "source": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-main-5:\\drawable\\seller_hero.png"
+    },
+    {
+        "merged": "com.sempatapps.app-debug-3:/drawable_ic_food.xml.flat",
+        "source": "com.sempatapps.app-main-5:/drawable/ic_food.xml"
+    },
+    {
+        "merged": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-debug-3:\\drawable_icon_bell.png.flat",
+        "source": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-main-5:\\drawable\\icon_bell.png"
+    },
+    {
+        "merged": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-debug-3:\\drawable_icon_food.png.flat",
+        "source": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-main-5:\\drawable\\icon_food.png"
+    },
+    {
+        "merged": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-debug-3:\\drawable_bread_photo_alt.png.flat",
+        "source": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-main-5:\\drawable\\bread_photo_alt.png"
+    },
+    {
+        "merged": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-debug-3:\\drawable_icon_home.png.flat",
+        "source": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-main-5:\\drawable\\icon_home.png"
+    },
+    {
+        "merged": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-debug-3:\\drawable_icon_location.png.flat",
+        "source": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-main-5:\\drawable\\icon_location.png"
+    },
+    {
+        "merged": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-debug-3:\\drawable_scan_illustration.png.flat",
+        "source": "C:\\Users\\USER\\.gradle\\daemon\\9.6.0\\com.sempatapps.app-main-5:\\drawable\\scan_illustration.png"
+    },
+    {
+        "merged": "com.sempatapps.app-debug-3:/drawable_ic_order.xml.flat",
+        "source": "com.sempatapps.app-main-5:/drawable/ic_order.xml"
+    }
+]

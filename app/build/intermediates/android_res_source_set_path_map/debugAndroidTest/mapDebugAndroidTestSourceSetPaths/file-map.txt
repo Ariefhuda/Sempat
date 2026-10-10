@@ -1,0 +1,5 @@
+com.sempatapps.test.app-updated_navigation_xml-0 C:\Sempat\app\build\generated\updated_navigation_xml\debugAndroidTest
+com.sempatapps.test.app-packageDebugAndroidTestResources-1 C:\Sempat\app\build\intermediates\incremental\debugAndroidTest\packageDebugAndroidTestResources\merged.dir
+com.sempatapps.test.app-packageDebugAndroidTestResources-2 C:\Sempat\app\build\intermediates\incremental\debugAndroidTest\packageDebugAndroidTestResources\stripped.dir
+com.sempatapps.test.app-debugAndroidTest-3 C:\Sempat\app\build\intermediates\merged_res\debugAndroidTest\mergeDebugAndroidTestResources
+gradleHome-0 C:\Users\USER\.gradle
