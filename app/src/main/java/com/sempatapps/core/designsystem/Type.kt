@@ -24,6 +24,13 @@ val HeadingLarge = TextStyle(
     lineHeight = 36.sp,
     color = Color(0xFF0C0C0C),
 )
+val HeadingLargeGreen = TextStyle(
+    fontFamily = Sora,
+    fontWeight = FontWeight.ExtraBold,
+    fontSize = 24.sp,
+    lineHeight = 36.sp,
+    color = Color(0xFF0E7C66),
+)
 
 val BodyBold = TextStyle(
     fontFamily = Figtree,

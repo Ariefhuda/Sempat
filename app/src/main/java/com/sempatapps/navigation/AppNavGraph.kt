@@ -1,5 +1,6 @@
 package com.sempatapps.navigation
 
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -24,7 +25,15 @@ fun AppNavGraph(){
         composable<RegisterRoute>{
             RegisterScreen(
                 onBackClick = {navController.popBackStack()},
+                onPenerimaClick = {navController.navigate(RegisterPenerimaRoute)},
+                onDonaturClick = {navController.navigate(RegisterDonaturRoute)}
             )
+        }
+        composable<RegisterPenerimaRoute> {
+            Text("Layar Penerima — belum dibuat")
+        }
+        composable< RegisterDonaturRoute> {
+            Text("Layar Donatur — belum dibuat")
         }
     }
 }

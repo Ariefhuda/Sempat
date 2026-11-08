@@ -6,3 +6,9 @@ import kotlinx.serialization.Serializable
 object OnboardingRoute
 @Serializable
 object RegisterRoute
+
+@Serializable
+object RegisterDonaturRoute
+
+@Serializable
+object RegisterPenerimaRoute
