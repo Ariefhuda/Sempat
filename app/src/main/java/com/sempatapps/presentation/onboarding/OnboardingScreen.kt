@@ -1,6 +1,8 @@
 package com.sempatapps.presentation.onboarding
 
 import android.util.Log
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -38,6 +40,7 @@ import com.sempatapps.R
 import com.sempatapps.core.designsystem.BodyBold
 import com.sempatapps.core.designsystem.Canvas
 import com.sempatapps.core.designsystem.HeadingLarge
+import androidx.compose.runtime.getValue
 
 data class OnboardingPage(
     val imageRes: Int,
@@ -84,7 +87,7 @@ fun OnboardingScreen(
             contentScale = ContentScale.FillBounds,
         )
 
-        Spacer(Modifier.height(100.dp))
+        Spacer(Modifier.height(60.dp))
 
         HorizontalPager(
             state = pagerState,
@@ -94,7 +97,7 @@ fun OnboardingScreen(
             OnboardingContent(page = onboardingPages[index])
         }
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(36.dp))
 
         PageIndicator(
             pageCount = onboardingPages.size,
@@ -123,8 +126,10 @@ fun OnboardingContent(page: OnboardingPage) {
         Image(
             painter = painterResource(page.imageRes),
             contentDescription = page.title,
-            contentScale = ContentScale.FillWidth,
-            modifier = Modifier.fillMaxWidth(),
+            contentScale = ContentScale.Fit,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(240.dp),
         )
 
         Spacer(Modifier.height(36.dp))
@@ -159,14 +164,22 @@ fun PageIndicator(
     ) {
         repeat(pageCount) { index ->
             val isActive = index == currentPage
+
+            val width by animateDpAsState(
+                targetValue = if (isActive) 24.dp else 8.dp,
+                label = "dotWidth",
+            )
+            val color by animateColorAsState(
+                targetValue = if (isActive) Color(0xFFFF8A00) else Color(0xFFD9D9D9),
+                label = "dotColor",
+            )
+
             Box(
                 modifier = Modifier
                     .height(8.dp)
-                    .width(if (isActive) 24.dp else 8.dp)
+                    .width(width)
                     .clip(CircleShape)
-                    .background(
-                        if (isActive) Color(0xFFFF8A00) else Color(0xFFD9D9D9)
-                    )
+                    .background(color)
             )
         }
     }
@@ -231,7 +244,6 @@ fun RegisterButton(
         Text(text = text, style = BodyBold, color = Color(0xFF0B5F4F))
     }
 }
-
 @Preview(showBackground = true, widthDp = 402, heightDp = 874)
 @Composable
 private fun OnboardingScreenPreview() {

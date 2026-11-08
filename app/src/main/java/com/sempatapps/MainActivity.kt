@@ -8,6 +8,7 @@ import com.sempatapps.data.repository.DummyHomeRepository
 import com.sempatapps.domain.model.HomeRole
 import com.sempatapps.presentation.home.HomeApp
 import dagger.hilt.android.AndroidEntryPoint
+import com.sempatapps.navigation.AppNavGraph
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -15,6 +16,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         val role = if (intent.getStringExtra("home_role") == "recipient") HomeRole.RECIPIENT else HomeRole.DONOR
         setContent {
+            AppNavGraph()
             val repository = remember { DummyHomeRepository() }
             HomeApp(role = role, repository = repository)
         }
