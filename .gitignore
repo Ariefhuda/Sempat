@@ -1,19 +1,22 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# Gradle & build output
+.gradle/
+build/
+.kotlin/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Konfigurasi lokal (beda tiap anggota tim)
 local.properties
+*.iml
+.idea/
+
+# Hasil build & kunci rilis
 *.apk
 *.aab
 *.keystore
 *.jks
+
+# Lain-lain
+*.zip
+.DS_Store
