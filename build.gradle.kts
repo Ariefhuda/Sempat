@@ -1,4 +1,8 @@
+// File build tingkat project. Versi plugin diatur di gradle/libs.versions.toml.
 plugins {
-    id("com.android.application") version "9.4.0" apply false
-    id("org.jetbrains.kotlin.plugin.compose") version "2.2.10" apply false
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.hilt) apply false
 }

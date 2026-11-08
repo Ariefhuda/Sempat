@@ -63,21 +63,35 @@ Hasil AI selalu bisa diubah pengguna sebelum disimpan. Model bisa salah, terutam
 
 ## Struktur project
 
-Susunan yang direncanakan:
+Folder sudah dibuat (masih kosong, diisi per fitur):
 
 ```
 app/src/main/java/com/sempatapps/
-├── core/            Tema dan komponen bersama
-├── data/            Repository, database lokal, sumber data
-├── domain/          Model dan use case
-├── ai/              Pembaca KTP dan pengenal makanan
-└── presentation/
-    ├── auth/        Pendaftaran dengan KTP dan masuk
-    ├── home/        Daftar donasi yang tersedia
-    ├── donation/    Buat donasi, ajukan pengambilan, status
-    ├── camera/      Kamera dan pratinjau hasil AI
-    └── profile/     Akun dan riwayat
+├── core/
+│   ├── designsystem/  Tema (warna, font dari Figma) dan komponen UI bersama
+│   ├── navigation/    NavHost dan daftar route
+│   └── di/            Modul Hilt
+├── data/
+│   ├── local/         Room, DataStore
+│   ├── remote/        API (backend belum diputuskan)
+│   └── repository/    Implementasi repository
+├── domain/
+│   ├── model/         Model data
+│   └── usecase/       Logika bisnis
+├── ai/
+│   ├── ktp/           Pembaca KTP (ML Kit)
+│   └── food/          Pengenal makanan (TFLite)
+└── presentation/      Satu folder per fitur: XxxScreen.kt, XxxViewModel.kt, XxxUiState.kt
+    ├── auth/          Pendaftaran dengan KTP dan masuk
+    ├── home/          Daftar donasi yang tersedia
+    ├── donation/      Buat donasi, ajukan pengambilan, status
+    ├── camera/        Kamera dan pratinjau hasil AI
+    └── profile/       Akun dan riwayat
 ```
+
+Semua versi library ada di `gradle/libs.versions.toml`. Tambah library baru di sana, lalu panggil lewat `libs.xxx` di `app/build.gradle.kts`.
+
+Build butuh JDK 17 ke atas. Kalau build dari terminal, pakai JDK bawaan Android Studio, misalnya `export JAVA_HOME=/opt/android-studio/jbr`.
 
 ## Rencana pengembangan
 
