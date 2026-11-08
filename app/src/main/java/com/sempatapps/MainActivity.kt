@@ -1,3 +1,4 @@
+
 package com.sempatapps
 
 import android.os.Bundle
@@ -11,12 +12,27 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val role = if (intent.getStringExtra("home_role") == "recipient") HomeRole.RECIPIENT else HomeRole.DONOR
+
+        val role = if (
+            intent.getStringExtra("home_role") == "recipient"
+        ) {
+            HomeRole.RECIPIENT
+        } else {
+            HomeRole.DONOR
+        }
+
         setContent {
-            val repository = remember { DummyHomeRepository() }
-            HomeApp(role = role, repository = repository)
+            val repository = remember {
+                DummyHomeRepository()
+            }
+
+            HomeApp(
+                role = role,
+                repository = repository
+            )
         }
     }
 }
