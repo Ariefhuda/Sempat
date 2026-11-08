@@ -1,4 +1,4 @@
-package com.sempatapps.presentation.home
+ package com.sempatapps.presentation.home
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -66,6 +67,10 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.zIndex
 import kotlinx.coroutines.launch
 import com.sempatapps.R
 import com.sempatapps.core.designsystem.*
@@ -84,16 +89,26 @@ internal fun DonorHome(
     onCreateDonation: () -> Unit
 ) {
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
-        Box(Modifier.fillMaxWidth().height(314.dp)) {
-            Box(Modifier.fillMaxWidth().height(286.dp).background(Brush.verticalGradient(listOf(Color(0xFF6EFFEE), Teal))))
+        Box(Modifier.fillMaxWidth().height(286.dp)) {
+            Box(Modifier.fillMaxWidth().height(286.dp).matchParentSize().background(Brush.verticalGradient(listOf(Color(0xFF3DA188), Color(0xFF0E7C65)))))
             Image(
                 painter = painterResource(R.drawable.seller_hero),
                 contentDescription = null,
-                modifier = Modifier.align(Alignment.TopEnd).padding(top = 76.dp, end = 20.dp).size(158.dp, 225.dp),
-                contentScale = ContentScale.Fit
+                alignment = Alignment.TopCenter,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .statusBarsPadding()
+                    .padding(end = 20.dp, top = 40.dp)
+                    .size(200.dp, 230.dp),
+                contentScale = ContentScale.Crop
             )
-            Column(Modifier.fillMaxWidth().padding(horizontal = 20.dp, vertical = 18.dp)) {
+            Column(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 25.dp, vertical = 18.dp)) {
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                    Image(modifier = Modifier.width(20.dp).height(16.dp),
+                        painter = painterResource(id = R.drawable.logo_putih),
+                        contentDescription = "image description",
+                        contentScale = ContentScale.FillBounds
+                    )
                     Text("SemPat", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     Spacer(Modifier.weight(1f))
                     NoticeButton(data.notices.count { !it.isRead }, onNotices)
@@ -103,21 +118,65 @@ internal fun DonorHome(
                 Text(data.displayName, color = Color.White, fontSize = 27.sp, fontWeight = FontWeight.ExtraBold)
                 Text("Yuk, salurkan pangan\nsurplusmu hari ini.", color = Color.White, fontSize = 15.sp, lineHeight = 22.sp)
             }
-            ImpactCard(data, Modifier.align(Alignment.BottomCenter).padding(horizontal = 20.dp))
         }
+        ImpactCard(
+            data,
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .offset(y = (-52).dp)
+                .zIndex(1f)
+        )
         Column(Modifier.padding(horizontal = 20.dp)) {
-            Spacer(Modifier.height(24.dp))
             ScanCard(onCreateDonation)
             Spacer(Modifier.height(25.dp))
-            SectionTitle("Opsi Utama")
+            SectionTitle("Mulai Berbagi")
             Spacer(Modifier.height(10.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Box(Modifier.weight(1f)) {
-                    ActionTile("Donasi Pangan", Orange, R.drawable.donation_illustration, onCreateDonation)
+            Box(
+                Modifier
+                    .width(360.dp)
+                    .height(170.dp)
+                    .background(color = Color(0xFFB84E08), shape = RoundedCornerShape(size = 24.dp))
+            ) {
+                Column(
+                    Modifier
+                        .align(Alignment.TopStart)
+                        .padding(start = 16.dp, top = 16.dp)
+                ) {
+                    Text(
+                        text = "Donasi Pangan",
+                        modifier = Modifier.width(122.dp).height(27.dp),
+                        style = TextStyle(
+                            fontSize = 18.sp,
+                            lineHeight = 27.sp,
+                            fontFamily = FontFamily(Font(R.font.figtree)),
+                            fontWeight = FontWeight(700),
+                            color = Color(0xFFFFFFFF),
+                        )
+                    )
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "Foto pangan berlebihmu,\nbiar sampai ke yang butuh.",
+                        modifier = Modifier.width(160.dp),
+                        style = TextStyle(
+                            fontSize = 13.sp,
+                            lineHeight = 18.sp,
+                            fontFamily = FontFamily(Font(R.font.figtree)),
+                            fontWeight = FontWeight(400),
+                            color = Color(0xEBFFFFFF),
+                        )
+                    )
                 }
-                Box(Modifier.weight(1f)) {
-                    ActionTile("Pangan Saya", Teal, R.drawable.bread_photo, onFood)
-                }
+                Image(
+                    painter = painterResource(id = R.drawable.donation_illustration),
+                    contentDescription = "image description",
+                    contentScale = ContentScale.FillBounds,
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .padding(end = 16.dp)
+                        .width(160.dp)
+                        .height(127.8148.dp)
+                )
             }
             Spacer(Modifier.height(25.dp))
             SectionHeading("Aktivitas Terakhir", onFood)
@@ -135,18 +194,22 @@ private fun ImpactCard(data: HomeData, modifier: Modifier = Modifier) {
             Text("Dampakmu Hari Ini", color = Muted, fontSize = 13.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(7.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                ImpactValue("♧", data.donatedWeight, "Terdonasikan", Modifier.weight(1f))
-                ImpactValue("♡", data.sharedCount, "Pangan tersalur", Modifier.weight(1f))
+                ImpactValue(R.drawable.money_bag, data.donatedWeight, "Terdonasikan", Modifier.weight(1f))
+                ImpactValue(R.drawable.donation,   data.sharedCount,  "Pangan tersalur", Modifier.weight(1f))
             }
         }
     }
 }
 
 @Composable
-private fun ImpactValue(symbol: String, value: String, label: String, modifier: Modifier) {
+private fun ImpactValue(symbol: Int, value: String, label: String, modifier: Modifier) {
     Surface(modifier, shape = RoundedCornerShape(8.dp), color = Color.White, shadowElevation = 2.dp) {
         Row(Modifier.padding(horizontal = 8.dp, vertical = 9.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(symbol, color = Teal, fontSize = 24.sp)
+            Image(
+                painter = painterResource(symbol),
+                contentDescription = null,
+                modifier = Modifier.size(24.dp),
+            )
             Spacer(Modifier.width(6.dp))
             Column {
                 Text(value, color = DarkTeal, fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, maxLines = 1)
@@ -174,13 +237,6 @@ private fun ScanCard(onClick: () -> Unit) {
     }
 }
 
-@Composable
-private fun ActionTile(title: String, background: Color, image: Int, onClick: () -> Unit) {
-    Box(Modifier.fillMaxWidth().height(170.dp).clip(RoundedCornerShape(22.dp)).background(background).clickable(onClick = onClick)) {
-        Text(title, modifier = Modifier.padding(14.dp), color = Color.White, fontSize = 17.sp, fontWeight = FontWeight.Bold)
-        Image(painterResource(image), contentDescription = null, modifier = Modifier.align(Alignment.BottomEnd).size(128.dp, 116.dp), contentScale = ContentScale.Fit)
-    }
-}
 
 @Preview(showBackground = true, widthDp = 402, heightDp = 874)
 @Composable
