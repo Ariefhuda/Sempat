@@ -1,0 +1,17 @@
+address
+birth
+blood_type
+citizenship
+created_at
+created_date
+district
+gender
+job
+marital_status
+name
+nik
+occur_until
+province_city
+religion
+rt_rw
+subdistrict
