@@ -39,6 +39,11 @@ android {
         compose = true
         buildConfig = true
     }
+
+    // Model dimuat dengan memory-map (KtpDetector), jadi tidak boleh dikompresi di dalam APK.
+    androidResources {
+        noCompress += "tflite"
+    }
 }
 
 dependencies {
@@ -81,6 +86,10 @@ dependencies {
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
+
+    // AI: deteksi kolom KTP (LiteRT) + baca teks (ML Kit, model ikut di APK, jalan offline)
+    implementation(libs.litert)
+    implementation(libs.mlkit.text.recognition)
 
     // Testing
     testImplementation(libs.junit)
