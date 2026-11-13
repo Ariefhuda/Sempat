@@ -42,6 +42,7 @@ android {
 }
 
 dependencies {
+    implementation(libs.androidx.compose.foundation)
     // Inti
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
