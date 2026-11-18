@@ -119,5 +119,8 @@ dependencies {
 fun apiUrl(): String {
     val local = Properties()
     rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use(local::load)
-    return local.getProperty("sempat.apiUrl") ?: "http://10.0.2.2:8080/"
+    // Urutan: local.properties, lalu -Psempat.apiUrl=... (dipakai GitHub Actions), lalu default emulator.
+    return local.getProperty("sempat.apiUrl")
+        ?: providers.gradleProperty("sempat.apiUrl").orNull
+        ?: "http://10.0.2.2:8080/"
 }
