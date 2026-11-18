@@ -117,6 +117,11 @@ sempat.apiUrl=https://api.domainkamu.com/
 Lalu build ulang app. Tanpa baris ini app memakai `http://10.0.2.2:8080/`
 (= server di laptop sendiri, kalau app dijalankan di emulator).
 
+## Deploy otomatis (CI/CD)
+
+Setelah server jalan, pasang deploy otomatis supaya setiap merge ke `main` langsung ter-update di CT:
+lihat [deploy/README.md](deploy/README.md).
+
 ## Sehari-hari
 
 ```bash
