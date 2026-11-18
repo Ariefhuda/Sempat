@@ -42,7 +42,9 @@ services:
     profiles: ["tunnel"]
     depends_on:
       - api
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+    # --url: tujuan untuk tunnel yang dibuat lewat CLI (cloudflared tunnel create).
+    # Tunnel dari dashboard memakai Public Hostname di dashboard; --url ini diabaikan.
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN} --url http://api:8080
 
 volumes:
   db-data:
