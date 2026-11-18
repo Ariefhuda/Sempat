@@ -1,25 +1,31 @@
 package com.sempatapps.navigation
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Button
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.sempatapps.data.repository.DummyHomeRepository
 import com.sempatapps.domain.model.HomeRole
+import com.sempatapps.presentation.auth.register.BuatPasswordScreen
+import com.sempatapps.presentation.auth.register.FotoKtpScreen
+import com.sempatapps.presentation.auth.register.HasilKtpScreen
+import com.sempatapps.presentation.auth.register.KodeVerifikasiScreen
+import com.sempatapps.presentation.auth.register.LokasiScreen
+import com.sempatapps.presentation.auth.register.PilihAlamatScreen
 import com.sempatapps.presentation.auth.register.RegisterScreen
+import com.sempatapps.presentation.auth.register.RegisterViewModel
 import com.sempatapps.presentation.home.HomeApp
 import com.sempatapps.presentation.onboarding.OnboardingScreen
+import com.sempatapps.presentation.splash.SplashScreen
+import com.sempatapps.presentation.splash.SplashViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun AppNavGraph() {
@@ -27,35 +33,92 @@ fun AppNavGraph() {
 
     NavHost(
         navController = navController,
-        startDestination = OnboardingRoute,
+        startDestination = SplashRoute,
     ) {
-        composable<OnboardingRoute> {
-            OnboardingScreen(
-                onLoginClick = {},
-                onRegisterClick = { navController.navigate(RegisterRoute) },
-            )
-        }
-        composable<RegisterRoute> {
-            RegisterScreen(
-                onBackClick = { navController.popBackStack() },
-                onContinue = { role ->
-                    when (role) {
-                        HomeRole.DONOR -> navController.navigate(RegisterDonaturRoute)
-                        HomeRole.RECIPIENT -> navController.navigate(RegisterPenerimaRoute)
+        composable<SplashRoute> {
+            val viewModel: SplashViewModel = hiltViewModel()
+            val scope = rememberCoroutineScope()
+            SplashScreen(
+                onFinished = {
+                    scope.launch {
+                        // Sudah pernah daftar/masuk di HP ini → langsung ke beranda.
+                        val peran = viewModel.peranTersimpan()
+                        if (peran != null) {
+                            navController.goToHome(peran)
+                        } else {
+                            navController.navigate(OnboardingRoute) {
+                                popUpTo(SplashRoute) { inclusive = true }
+                            }
+                        }
                     }
                 },
             )
         }
-        composable<RegisterDonaturRoute> {
-            RegisterPlaceholder("Layar Donatur — belum dibuat") {
-                navController.goToHome(HomeRole.DONOR)
+        composable<OnboardingRoute> {
+            OnboardingScreen(
+                onLoginClick = {},
+                onRegisterClick = { navController.navigate(RegisterGraph) },
+            )
+        }
+
+        navigation<RegisterGraph>(startDestination = RegisterRoute) {
+            composable<RegisterRoute> { entry ->
+                val viewModel = entry.registerViewModel(navController)
+                RegisterScreen(
+                    onBackClick = { navController.popBackStack() },
+                    onContinue = { role ->
+                        viewModel.pilihPeran(role)
+                        navController.navigate(FotoKtpRoute)
+                    },
+                )
+            }
+            composable<FotoKtpRoute> { entry ->
+                FotoKtpScreen(
+                    viewModel = entry.registerViewModel(navController),
+                    onBackClick = { navController.popBackStack() },
+                    onKtpTerbaca = { navController.navigate(HasilKtpRoute) },
+                    onIsiManual = { navController.navigate(HasilKtpRoute) },
+                )
+            }
+            composable<HasilKtpRoute> { entry ->
+                HasilKtpScreen(
+                    viewModel = entry.registerViewModel(navController),
+                    onBackClick = { navController.popBackStack() },
+                    onLanjut = { navController.navigate(LokasiRoute) },
+                )
+            }
+            composable<LokasiRoute> { entry ->
+                LokasiScreen(
+                    viewModel = entry.registerViewModel(navController),
+                    onBackClick = { navController.popBackStack() },
+                    onPilihDiPeta = { navController.navigate(PilihAlamatRoute) },
+                    onKodeTerkirim = { navController.navigate(KodeVerifikasiRoute) },
+                )
+            }
+            composable<PilihAlamatRoute> { entry ->
+                PilihAlamatScreen(
+                    viewModel = entry.registerViewModel(navController),
+                    onBackClick = { navController.popBackStack() },
+                    onKonfirmasi = { navController.popBackStack() },
+                )
+            }
+            composable<KodeVerifikasiRoute> { entry ->
+                KodeVerifikasiScreen(
+                    viewModel = entry.registerViewModel(navController),
+                    onBackClick = { navController.popBackStack() },
+                    onKodeBenar = { navController.navigate(BuatPasswordRoute) },
+                )
+            }
+            composable<BuatPasswordRoute> { entry ->
+                val viewModel = entry.registerViewModel(navController)
+                BuatPasswordScreen(
+                    viewModel = viewModel,
+                    onBackClick = { navController.popBackStack() },
+                    onMulai = { navController.goToHome(viewModel.state.value.data.peran) },
+                )
             }
         }
-        composable<RegisterPenerimaRoute> {
-            RegisterPlaceholder("Layar Penerima — belum dibuat") {
-                navController.goToHome(HomeRole.RECIPIENT)
-            }
-        }
+
         composable<HomeRoute> { entry ->
             val route = entry.toRoute<HomeRoute>()
             val repository = remember { DummyHomeRepository() }
@@ -64,21 +127,19 @@ fun AppNavGraph() {
     }
 }
 
-/** Masuk Home dan buang onboarding/register dari back stack, jadi tombol back nggak balik ke register. */
-private fun NavController.goToHome(role: HomeRole) {
-    navigate(HomeRoute(role)) {
-        popUpTo(OnboardingRoute) { inclusive = true }
-    }
+/**
+ * Semua layar daftar memakai RegisterViewModel yang sama (milik RegisterGraph),
+ * jadi isian tetap ada waktu pindah langkah dan otomatis dibuang setelah daftar selesai/batal.
+ */
+@Composable
+private fun NavBackStackEntry.registerViewModel(navController: NavController): RegisterViewModel {
+    val graphEntry = remember(this) { navController.getBackStackEntry<RegisterGraph>() }
+    return hiltViewModel(graphEntry)
 }
 
-@Composable
-private fun RegisterPlaceholder(title: String, onDone: () -> Unit) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterVertically),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Text(title)
-        Button(onClick = onDone) { Text("Lanjut ke Home (sementara)") }
+/** Masuk Home dan kosongkan back stack, jadi tombol back di Home langsung keluar aplikasi. */
+private fun NavController.goToHome(role: HomeRole) {
+    navigate(HomeRoute(role)) {
+        popUpTo(graph.id) { inclusive = true }
     }
 }

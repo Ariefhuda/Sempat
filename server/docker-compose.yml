@@ -1,0 +1,45 @@
+# Jalankan: docker compose up -d --build
+# Dengan Cloudflare Tunnel: docker compose --profile tunnel up -d --build
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sempat
+      POSTGRES_USER: sempat
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sempat -d sempat"]
+      interval: 5s
+      retries: 10
+    # Sengaja tidak ada "ports": database tidak bisa diakses dari luar container.
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/sempat
+      DB_USER: sempat
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      NIK_SECRET: ${NIK_SECRET}
+      OTP_DEV_MODE: ${OTP_DEV_MODE:-false}
+    ports:
+      # Untuk tes dari HP/laptop di jaringan yang sama: http://IP-container:8080
+      - "8080:8080"
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    profiles: ["tunnel"]
+    depends_on:
+      - api
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
+
+volumes:
+  db-data:

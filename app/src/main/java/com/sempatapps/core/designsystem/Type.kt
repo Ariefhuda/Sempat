@@ -52,3 +52,30 @@ val Caption = TextStyle(
     fontSize = 12.sp,
     lineHeight = 18.sp,
 )
+
+/** Figma "Heading 3": Figtree Bold 20. */
+val Heading3 = TextStyle(
+    fontFamily = Figtree,
+    fontWeight = FontWeight.Bold,
+    fontSize = 20.sp,
+    lineHeight = 30.sp,
+    color = Ink,
+)
+
+/** Figma "Title": Figtree Bold 18. */
+val Title = TextStyle(
+    fontFamily = Figtree,
+    fontWeight = FontWeight.Bold,
+    fontSize = 18.sp,
+    lineHeight = 27.sp,
+    color = Ink,
+)
+
+/** Figma "Body text": Figtree Regular 14. */
+val Body = TextStyle(
+    fontFamily = Figtree,
+    fontWeight = FontWeight.Normal,
+    fontSize = 14.sp,
+    lineHeight = 21.sp,
+    color = Ink,
+)
