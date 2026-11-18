@@ -26,7 +26,8 @@ jobs:
           distribution: temurin
           java-version: "21"
 
-      - uses: android-actions/setup-android@v3
+      # Android SDK sudah terpasang di runner ubuntu-latest (ANDROID_HOME);
+      # platform yang belum ada diunduh otomatis oleh Gradle.
 
       - uses: gradle/actions/setup-gradle@v4
 
