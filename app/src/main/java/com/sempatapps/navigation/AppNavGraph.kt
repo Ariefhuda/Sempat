@@ -46,7 +46,6 @@ fun AppNavGraph() {
                 },
             )
         }
-        // TODO: ganti placeholder ini dengan form register asli (+ simpan ke DB)
         composable<RegisterDonaturRoute> {
             RegisterPlaceholder("Layar Donatur — belum dibuat") {
                 navController.goToHome(HomeRole.DONOR)

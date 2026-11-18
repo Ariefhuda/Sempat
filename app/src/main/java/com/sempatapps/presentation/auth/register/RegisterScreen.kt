@@ -128,7 +128,7 @@ private fun RegisterContent(
         ) {
             RoleCard(
                 title = "Donatur",
-                description = "Salurkan pangan berlebihmu",
+                description = "Salurkan pangan\n rlebihmu",
                 isSelected = selectedRole == HomeRole.DONOR,
                 onClick = { onRoleSelect(HomeRole.DONOR) },
                 textAlign = TextAlign.End,

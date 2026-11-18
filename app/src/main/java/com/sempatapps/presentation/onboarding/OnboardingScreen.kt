@@ -45,7 +45,6 @@ data class OnboardingPage(
     val title: String,
     val description: String,
 )
-
 val onboardingPages = listOf(
     OnboardingPage(
         imageRes = R.drawable.icon_splash1,

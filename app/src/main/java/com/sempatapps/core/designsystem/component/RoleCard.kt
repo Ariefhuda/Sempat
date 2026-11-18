@@ -84,6 +84,8 @@ fun RoleCard(
             Text(
                 text = description,
                 style = Caption,
+                minLines = 2,
+                maxLines = 2,
                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                 color = contentColor,
                 textAlign = textAlign,
@@ -102,7 +104,7 @@ private fun RoleCardPreview() {
     ) {
         RoleCard(
             title = "Donatur",
-            description = "Salurkan pangan berlebihmu",
+            description = "Salurkan pangan \nberlebihmu",
             isSelected = true,
             onClick = {},
             textAlign = TextAlign.End,
