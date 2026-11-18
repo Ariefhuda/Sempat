@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 12+ selalu menampilkan splash sistem (ikon di tengah). Ikonnya dibuat transparan
+         supaya splash sistem = layar kosong (frame 1 Figma), lalu animasi logo di SplashScreen.kt
+         menyambung tanpa terlihat dua splash. -->
+    <style name="Theme.Sempat" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/canvas</item>
+        <item name="android:windowSplashScreenBackground">@color/canvas</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@android:color/transparent</item>
+    </style>
+</resources>
