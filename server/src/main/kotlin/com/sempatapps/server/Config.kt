@@ -18,7 +18,7 @@ data class Config(
     companion object {
         fun fromEnv(): Config = Config(
             port = env("PORT", "8080").toInt(),
-            dbUrl = env("DB_URL", "jdbc:postgresql://localhost:5432/sempat"),
+            dbUrl = env("DB_URL", "jdbc:mysql://localhost:3306/sempat"),
             dbUser = env("DB_USER", "sempat"),
             dbPassword = env("DB_PASSWORD"),
             jwtSecret = env("JWT_SECRET"),

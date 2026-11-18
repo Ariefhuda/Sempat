@@ -35,8 +35,8 @@ import kotlin.test.assertNotNull
 class AuthRoutesTest {
 
     private fun ApplicationTestBuilder.siapkan(): HttpClient {
-        // Tiap test pakai database H2 baru di memori, mode PostgreSQL.
-        val db = Database.connect("jdbc:h2:mem:${UUID.randomUUID()};MODE=PostgreSQL;DB_CLOSE_DELAY=-1", "org.h2.Driver")
+        // Tiap test pakai database H2 baru di memori, mode MySQL.
+        val db = Database.connect("jdbc:h2:mem:${UUID.randomUUID()};MODE=MySQL;DB_CLOSE_DELAY=-1", "org.h2.Driver")
         transaction(db) { SchemaUtils.create(Users, Lokasi, KodeOtp) }
         val auth = AuthService(db, TokenService("rahasia-test"), nikSecret = "nik-test", otpDevMode = true)
         application { module(auth) }

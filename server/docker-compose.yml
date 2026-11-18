@@ -2,18 +2,21 @@
 # Dengan Cloudflare Tunnel: docker compose --profile tunnel up -d --build
 services:
   db:
-    image: postgres:17-alpine
+    image: mysql:8.4
     restart: unless-stopped
     environment:
-      POSTGRES_DB: sempat
-      POSTGRES_USER: sempat
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: sempat
+      MYSQL_USER: sempat
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
     volumes:
-      - db-data:/var/lib/postgresql/data
+      - db-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U sempat -d sempat"]
+      # -h 127.0.0.1 (bukan localhost) supaya lewat TCP: saat MySQL baru pertama inisialisasi,
+      # server sementara cuma buka socket, jadi cek ini baru lolos setelah MySQL benar-benar siap.
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u sempat -p$$MYSQL_PASSWORD --silent"]
       interval: 5s
-      retries: 10
+      retries: 20
     # Sengaja tidak ada "ports": database tidak bisa diakses dari luar container.
 
   api:
@@ -23,7 +26,7 @@ services:
       db:
         condition: service_healthy
     environment:
-      DB_URL: jdbc:postgresql://db:5432/sempat
+      DB_URL: jdbc:mysql://db:3306/sempat
       DB_USER: sempat
       DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
