@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Khusus build debug: boleh http biasa supaya bisa tes ke server lokal (http://10.0.2.2:8080).
+     Build release tetap wajib https (lewat Cloudflare). -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <application android:usesCleartextTraffic="true" />
+</manifest>
