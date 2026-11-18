@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="18dp"
+    android:height="18dp"
+    android:viewportWidth="18"
+    android:viewportHeight="18">
+    <!-- Di Figma ikon "next" ini dicerminkan jadi panah kembali -->
+    <group android:scaleX="-1" android:pivotX="9">
+    <path android:pathData="M12.6 8.36371V9.63631L7.21625 15.0363L5.94275 13.7637L10.7064 9.00001L5.94275 4.23631L7.21535 2.96371L12.6 8.36371Z"
+        android:fillColor="#FD8617" />
+    </group>
+</vector>

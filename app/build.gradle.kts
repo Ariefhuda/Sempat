@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -20,6 +22,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Alamat server API. Default 10.0.2.2 = laptop sendiri kalau dijalankan dari emulator.
+        // Ganti tanpa ubah kode: tambahkan baris ini di local.properties
+        //   sempat.apiUrl=https://api.domainkamu.com/
+        buildConfigField("String", "API_URL", "\"${apiUrl()}\"")
     }
 
     buildTypes {
@@ -81,6 +88,14 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.datastore.preferences)
 
+    // Jaringan & peta
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.osmdroid)
+    implementation(libs.androidx.exifinterface)
+
     // Kamera
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
@@ -99,4 +114,10 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+fun apiUrl(): String {
+    val local = Properties()
+    rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use(local::load)
+    return local.getProperty("sempat.apiUrl") ?: "http://10.0.2.2:8080/"
 }
