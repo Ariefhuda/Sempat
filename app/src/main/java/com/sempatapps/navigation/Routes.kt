@@ -4,6 +4,9 @@ import com.sempatapps.domain.model.HomeRole
 import kotlinx.serialization.Serializable
 
 @Serializable
+object SplashRoute
+
+@Serializable
 object OnboardingRoute
 
 @Serializable

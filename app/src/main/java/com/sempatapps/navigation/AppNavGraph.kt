@@ -20,6 +20,7 @@ import com.sempatapps.domain.model.HomeRole
 import com.sempatapps.presentation.auth.register.RegisterScreen
 import com.sempatapps.presentation.home.HomeApp
 import com.sempatapps.presentation.onboarding.OnboardingScreen
+import com.sempatapps.presentation.splash.SplashScreen
 
 @Composable
 fun AppNavGraph() {
@@ -27,8 +28,18 @@ fun AppNavGraph() {
 
     NavHost(
         navController = navController,
-        startDestination = OnboardingRoute,
+        startDestination = SplashRoute,
     ) {
+        composable<SplashRoute> {
+            SplashScreen(
+                onFinished = {
+                    // TODO: setelah ada DB, kalau user sudah login langsung ke HomeRoute(role).
+                    navController.navigate(OnboardingRoute) {
+                        popUpTo(SplashRoute) { inclusive = true }
+                    }
+                },
+            )
+        }
         composable<OnboardingRoute> {
             OnboardingScreen(
                 onLoginClick = {},
