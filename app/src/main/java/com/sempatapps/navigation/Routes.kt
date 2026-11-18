@@ -1,5 +1,6 @@
 package com.sempatapps.navigation
 
+import com.sempatapps.domain.model.HomeRole
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -13,3 +14,6 @@ object RegisterDonaturRoute
 
 @Serializable
 object RegisterPenerimaRoute
+
+@Serializable
+data class HomeRoute(val role: HomeRole)
