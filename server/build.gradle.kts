@@ -36,7 +36,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:$exposed")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed")
     implementation("org.jetbrains.exposed:exposed-java-time:$exposed")
-    implementation("org.postgresql:postgresql:42.7.7")
+    implementation("com.mysql:mysql-connector-j:9.1.0")
     implementation("com.zaxxer:HikariCP:6.3.0")
 
     implementation("com.auth0:java-jwt:4.5.0")

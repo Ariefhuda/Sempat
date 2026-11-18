@@ -10,7 +10,7 @@ HP (app SEMPAT)
 Cloudflare  ──(Cloudflare Tunnel, terenkripsi)──►  container Proxmox
                                                     ├─ cloudflared   (ujung tunnel)
                                                     ├─ api           (Ktor, port 8080)
-                                                    └─ db            (PostgreSQL, tertutup dari luar)
+                                                    └─ db            (MySQL, tertutup dari luar)
 ```
 
 Kenapa begini:
@@ -26,7 +26,7 @@ Kenapa begini:
 | --- | --- | --- |
 | Proxmox LXC (Debian) | "komputer" kecil tempat semua jalan | Proxmox |
 | Docker + Docker Compose | menjalankan 3 container di bawah dengan satu perintah | di dalam LXC |
-| `db` – PostgreSQL 17 | database: tabel `users`, `lokasi`, `kode_otp` | container |
+| `db` – MySQL 8.4 | database: tabel `users`, `lokasi`, `kode_otp` | container |
 | `api` – server Ktor (folder ini) | endpoint `/auth/otp/kirim`, `/auth/otp/cek`, `/auth/daftar` | container |
 | `cloudflared` | membuka `api` ke internet lewat Cloudflare Tunnel | container |
 | Akun Cloudflare + 1 domain | alamat publik, mis. `api.sempat.my.id` | cloudflare.com (gratis) |
@@ -61,7 +61,7 @@ cp .env.example .env
 nano .env
 ```
 
-Isi `DB_PASSWORD`, `JWT_SECRET`, `NIK_SECRET` dengan string acak. Buat pakai:
+Isi `DB_PASSWORD`, `DB_ROOT_PASSWORD`, `JWT_SECRET`, `NIK_SECRET` dengan string acak. Buat pakai:
 
 ```bash
 openssl rand -hex 32
@@ -122,8 +122,8 @@ Lalu build ulang app. Tanpa baris ini app memakai `http://10.0.2.2:8080/`
 ```bash
 git pull && docker compose --profile tunnel up -d --build   # update server
 docker compose logs -f api                                  # lihat log
-docker compose exec db psql -U sempat -d sempat             # buka database
-docker compose exec db pg_dump -U sempat sempat > backup-$(date +%F).sql   # backup
+docker compose exec db mysql -u sempat -p sempat            # buka database (isi DB_PASSWORD)
+docker compose exec db sh -c 'mysqldump -u sempat -p"$MYSQL_PASSWORD" --no-tablespaces sempat' > backup-$(date +%F).sql   # backup
 ```
 
 ## Catatan keamanan
