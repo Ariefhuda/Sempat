@@ -10,6 +10,7 @@ HP (app SEMPAT)
 Cloudflare  ──(Cloudflare Tunnel, terenkripsi)──►  container Proxmox
                                                     ├─ cloudflared   (ujung tunnel)
                                                     ├─ api           (Ktor, port 8080)
+                                                    ├─ phpmyadmin    (lihat/ubah DB lewat browser)
                                                     └─ db            (MySQL, tertutup dari luar)
 ```
 
@@ -26,9 +27,10 @@ Kenapa begini:
 | --- | --- | --- |
 | Proxmox LXC (Debian) | "komputer" kecil tempat semua jalan | Proxmox |
 | Docker + Docker Compose | menjalankan 3 container di bawah dengan satu perintah | di dalam LXC |
-| `db` – MySQL 8.4 | database: tabel `users`, `lokasi`, `kode_otp` | container |
-| `api` – server Ktor (folder ini) | endpoint `/auth/otp/kirim`, `/auth/otp/cek`, `/auth/daftar` | container |
-| `cloudflared` | membuka `api` ke internet lewat Cloudflare Tunnel | container |
+| `db` – MySQL 8.4 | database: `users`, `lokasi`, `kode_otp`, `donasi`, `pengajuan`, `notifikasi` | container |
+| `api` – server Ktor (folder ini) | semua endpoint (lihat tabel Endpoint di bawah) | container |
+| `phpmyadmin` | lihat & ubah isi database lewat browser | container |
+| `cloudflared` | membuka `api` dan `phpmyadmin` ke internet lewat Cloudflare Tunnel | container |
 | Akun Cloudflare + 1 domain | alamat publik, mis. `api.sempat.my.id` | cloudflare.com (gratis) |
 
 ## Langkah 1 – Buat container (LXC) di Proxmox
@@ -92,6 +94,10 @@ Sampai sini server sudah bisa dicoba dari HP/laptop **di jaringan yang sama**:
    - Subdomain: `api`, Domain: domainmu
    - Service: **HTTP** → `api:8080`
      (`api` = nama service di docker-compose, karena cloudflared ada di jaringan Docker yang sama)
+
+   > Tunnel `sempat` yang sekarang dipakai dibuat lewat CLI, jadi hostname-nya diatur di
+   > [`cloudflared/config.yml`](cloudflared/config.yml), bukan di dashboard. Token-nya:
+   > `cloudflared tunnel token sempat` (dari laptop yang sudah `cloudflared login`).
 5. Jalankan dengan profil tunnel:
 
 ```bash
@@ -140,7 +146,34 @@ docker compose exec db sh -c 'mysqldump -u sempat -p"$MYSQL_PASSWORD" --no-table
 - NIK tidak disimpan utuh: hanya hash (untuk cek duplikat) dan versi tersamar `1271 •••• •••• 0001`.
 - Password disimpan sebagai hash bcrypt. Foto KTP tidak pernah dikirim ke server.
 
+## phpMyAdmin
+
+Alamat: **https://db-sempat.ususbuntu.my.id** (lewat tunnel yang sama dengan API, aturannya di
+[`cloudflared/config.yml`](cloudflared/config.yml)). Login pakai user `sempat` + `DB_PASSWORD` dari `.env`.
+User `sempat` hanya bisa mengakses database `sempat`; jangan pakai `root` untuk kerja sehari-hari.
+
+phpMyAdmin **wajib** ditutup dengan Cloudflare Access supaya halaman login-nya tidak bisa dibuka sembarang orang:
+
+1. **Zero Trust → Access → Applications → Add an application → Self-hosted**
+2. Application name: `phpMyAdmin SEMPAT`, Domain: `db-sempat.ususbuntu.my.id`
+3. Policy: Action **Allow**, Include **Emails** → isi email anggota kelompok
+4. Login method: **One-time PIN** (kode dikirim ke email, tidak perlu setup lain)
+
+Tanpa internet / sebelum Access dipasang, buka lewat SSH tunnel dari laptop:
+
+```bash
+ssh -L 8081:localhost:8081 sempat-ct     # lalu buka http://localhost:8081
+```
+
+App Android **tidak** memakai phpMyAdmin dan tidak konek ke MySQL. App selalu lewat API.
+
 ## Endpoint
+
+Route bertanda 🔒 wajib header `Authorization: Bearer <token>` (token dari `/auth/daftar` atau `/auth/masuk`).
+Error selalu berbentuk `{ "pesan": "..." }`; `401` = belum/sesi habis, `403` = peran salah / bukan miliknya,
+`404` = tidak ada, `409` = status tidak memungkinkan. Waktu memakai ISO-8601 (`2026-11-22T17:00:00+07:00`).
+
+**Akun**
 
 | Method | Path | Body | Hasil |
 | --- | --- | --- | --- |
@@ -148,5 +181,40 @@ docker compose exec db sh -c 'mysqldump -u sempat -p"$MYSQL_PASSWORD" --no-table
 | POST | `/auth/otp/kirim` | `{ "noHp" }` | kode dikirim; `409` kalau nomor sudah terdaftar, `429` kalau kirim ulang < 60 detik |
 | POST | `/auth/otp/cek` | `{ "noHp", "kode" }` | `{ "tokenVerifikasi" }` (berlaku 15 menit) |
 | POST | `/auth/daftar` | data KTP + lokasi + password + `tokenVerifikasi` | `{ "token", "user" }`; `409` kalau NIK sudah terdaftar |
+| POST | `/auth/masuk` | `{ "noHp", "password" }` | `{ "token", "user" }`; `401` kalau salah |
+| GET 🔒 | `/me` | – | profil + lokasi |
+| PUT 🔒 | `/me/lokasi` | `{ "latitude", "longitude", "alamat", "patokan" }` | profil terbaru |
+
+**Donasi** (D = hanya donatur, P = hanya penerima)
+
+| Method | Path | Siapa | Body / query | Hasil |
+| --- | --- | --- | --- | --- |
+| POST 🔒 | `/donasi` | D | `{ nama, kategori, jumlah, beratGram, batasAmbil, catatan?, fotoUrl?, lokasi? }` | donasi baru (`TERSEDIA`); tanpa `lokasi` = lokasi profil |
+| GET 🔒 | `/donasi` | semua | `?lat=&lng=&radiusKm=25` (opsional) | pangan `TERSEDIA` terdekat + `jarakKm` |
+| GET 🔒 | `/donasi/saya` | D | `?status=TERSEDIA\|DIPROSES\|SELESAI\|DIBATALKAN` | donasi milik sendiri |
+| GET 🔒 | `/donasi/saya/ringkasan` | D | – | `{ totalBeratGram, jumlahSelesai, jumlahAktif }` |
+| GET 🔒 | `/donasi/{id}` | semua | – | detail donasi |
+| POST 🔒 | `/donasi/{id}/batal` | D pemilik | – | donasi `DIBATALKAN`, pengajuan aktif ikut batal |
+| GET 🔒 | `/donasi/{id}/pengajuan` | D pemilik | – | daftar pengajuan untuk donasi itu |
+| POST 🔒 | `/donasi/{id}/pengajuan` | P | `{ catatan?, buktiUrl? }` | pengajuan `MENUNGGU` |
+
+**Pengajuan**
+
+| Method | Path | Siapa | Hasil |
+| --- | --- | --- | --- |
+| GET 🔒 | `/pengajuan/saya` | P | pengajuan milik sendiri + data donasinya |
+| POST 🔒 | `/pengajuan/{id}/setujui` | D pemilik donasi | `DISETUJUI`, donasi `DIPROSES`, pengajuan lain otomatis `DITOLAK` |
+| POST 🔒 | `/pengajuan/{id}/tolak` | D pemilik donasi | `DITOLAK` |
+| POST 🔒 | `/pengajuan/{id}/diterima` | P pemilik | `DITERIMA`, donasi `SELESAI` |
+| POST 🔒 | `/pengajuan/{id}/batal` | P pemilik | `DIBATALKAN`; kalau sudah disetujui, donasi kembali `TERSEDIA` |
+
+`noHpKontak` di pengajuan (nomor pihak lain, untuk chat/telepon) baru terisi setelah `DISETUJUI`.
+
+**Notifikasi** (dibuat otomatis saat ada pengajuan / disetujui / ditolak / diterima / dibatalkan)
+
+| Method | Path | Hasil |
+| --- | --- | --- |
+| GET 🔒 | `/notifikasi` | 100 notifikasi terbaru |
+| POST 🔒 | `/notifikasi/{id}/baca` | `204` |
 
 Menjalankan test server: `./gradlew test` (pakai database H2 di memori, tidak butuh Docker).

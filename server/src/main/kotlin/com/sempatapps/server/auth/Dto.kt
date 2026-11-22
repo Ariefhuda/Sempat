@@ -56,3 +56,6 @@ data class ErrorResponse(val pesan: String)
 
 /** Dilempar dari mana saja, diubah jadi response {"pesan": ...} oleh StatusPages. */
 class ApiException(val status: Int, override val message: String) : RuntimeException(message)
+
+@Serializable
+data class MasukRequest(val noHp: String, val password: String)

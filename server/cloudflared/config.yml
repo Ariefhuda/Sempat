@@ -1,0 +1,11 @@
+# Aturan tunnel "sempat" (tunnel dibuat lewat CLI, jadi aturannya dibaca dari file ini, bukan dashboard).
+# Setelah menambah hostname baru, buat juga DNS-nya sekali dari laptop yang sudah `cloudflared login`:
+#   cloudflared tunnel route dns sempat <hostname>
+ingress:
+  # API untuk app Android
+  - hostname: api-sempat.ususbuntu.my.id
+    service: http://api:8080
+  # phpMyAdmin. WAJIB dilindungi Cloudflare Access (lihat server/README.md, "phpMyAdmin").
+  - hostname: db-sempat.ususbuntu.my.id
+    service: http://phpmyadmin:80
+  - service: http_status:404

@@ -32,6 +32,8 @@ dependencies {
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktor")
     implementation("io.ktor:ktor-server-status-pages:$ktor")
     implementation("io.ktor:ktor-server-call-logging:$ktor")
+    implementation("io.ktor:ktor-server-auth:$ktor")
+    implementation("io.ktor:ktor-server-auth-jwt:$ktor")
 
     implementation("org.jetbrains.exposed:exposed-core:$exposed")
     implementation("org.jetbrains.exposed:exposed-jdbc:$exposed")

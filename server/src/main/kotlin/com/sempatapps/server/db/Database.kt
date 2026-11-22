@@ -19,7 +19,7 @@ fun connectDatabase(url: String, user: String, password: String): Database {
     // Untuk sekarang tabel dibuat otomatis waktu server nyala.
     // Kalau nanti struktur tabel sering berubah, ganti pakai migrasi (mis. Flyway).
     transaction(db) {
-        SchemaUtils.create(Users, Lokasi, KodeOtp)
+        SchemaUtils.create(*SEMUA_TABEL)
     }
     return db
 }

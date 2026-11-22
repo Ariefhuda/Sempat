@@ -144,6 +144,21 @@ class AuthService(
         )
     }
 
+    fun masuk(request: MasukRequest): SesiResponse {
+        val noHp = runCatching { normalisasiNoHp(request.noHp) }.getOrNull()
+            ?: throw ApiException(401, SALAH_MASUK)
+        val baris = transaction(db) { Users.selectAll().where { Users.noHp eq noHp }.singleOrNull() }
+        // Tetap jalankan bcrypt walau user tidak ada, supaya waktu respons tidak membocorkan nomor terdaftar.
+        val hash = baris?.get(Users.passwordHash) ?: HASH_PALSU
+        if (!BCrypt.checkpw(request.password, hash) || baris == null) throw ApiException(401, SALAH_MASUK)
+
+        val id = baris[Users.id]
+        return SesiResponse(
+            token = tokens.buatTokenSesi(id, baris[Users.peran]),
+            user = UserDto(id = id.toString(), peran = baris[Users.peran], nama = baris[Users.nama], noHp = noHp),
+        )
+    }
+
     private fun hashNik(nik: String): String {
         val mac = Mac.getInstance("HmacSHA256").apply { init(nikKey) }
         return mac.doFinal(nik.toByteArray()).joinToString("") { "%02x".format(it) }
@@ -154,5 +169,7 @@ class AuthService(
         private val UMUR_KODE = Duration.ofMinutes(5)
         private val JEDA_KIRIM_ULANG = Duration.ofSeconds(60)
         private const val MAKS_SALAH = 5
+        private const val SALAH_MASUK = "Nomor HP atau password salah"
+        private val HASH_PALSU = BCrypt.hashpw("tidak-dipakai", BCrypt.gensalt())
     }
 }
