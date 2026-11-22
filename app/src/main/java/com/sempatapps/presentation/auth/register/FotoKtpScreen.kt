@@ -1,6 +1,9 @@
 package com.sempatapps.presentation.auth.register
 
-import android.net.Uri
+import android.Manifest
+import android.content.pm.PackageManager
+import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -33,11 +36,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sempatapps.R
 import com.sempatapps.core.designsystem.Body
@@ -55,7 +60,7 @@ import com.sempatapps.core.designsystem.component.SecondaryButton
 
 /**
  * Figma: "Daftar - Foto KTP (Donatur/Penerima)" dan "Daftar - KTP Tidak Terbaca".
- * Foto diambil pakai aplikasi kamera bawaan HP, lalu dibaca di HP (tidak dikirim ke server).
+ * Foto diambil pakai [KameraKtp] (ada bingkai bantuan), lalu dibaca di HP (tidak dikirim ke server).
  */
 @Composable
 fun FotoKtpScreen(
@@ -65,20 +70,42 @@ fun FotoKtpScreen(
     onIsiManual: () -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    // Disimpan pakai rememberSaveable: kalau activity dibuat ulang saat kamera terbuka, uri-nya tidak hilang.
-    var uriFoto by rememberSaveable { mutableStateOf<Uri?>(null) }
-    val kamera = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { berhasil ->
-        val uri = uriFoto
-        if (berhasil && uri != null) viewModel.bacaKtp(uri, onKtpTerbaca) else viewModel.fotoDibatalkan()
+    val context = LocalContext.current
+    // rememberSaveable: kalau activity dibuat ulang (mis. HP diputar), kamera tetap terbuka.
+    var kameraTerbuka by rememberSaveable { mutableStateOf(false) }
+    val izinKamera = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { boleh ->
+        if (boleh) {
+            kameraTerbuka = true
+        } else {
+            Toast.makeText(context, "Izin kamera dibutuhkan untuk memotret KTP", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    if (kameraTerbuka) {
+        val tutup = {
+            kameraTerbuka = false
+            viewModel.fotoDibatalkan()
+        }
+        BackHandler(onBack = tutup)
+        KameraKtp(
+            deteksi = viewModel::ktpDalamBingkai,
+            buatUri = viewModel::uriFotoBaru,
+            onFoto = { uri ->
+                kameraTerbuka = false
+                viewModel.bacaKtp(uri, onKtpTerbaca)
+            },
+            onTutup = tutup,
+        )
+        return
     }
 
     FotoKtpContent(
         statusScan = state.statusScan,
         onBackClick = onBackClick,
         onAmbilFoto = {
-            val uri = viewModel.uriFotoBaru()
-            uriFoto = uri
-            kamera.launch(uri)
+            val sudahBoleh = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) ==
+                PackageManager.PERMISSION_GRANTED
+            if (sudahBoleh) kameraTerbuka = true else izinKamera.launch(Manifest.permission.CAMERA)
         },
         onIsiManual = {
             viewModel.isiDataSendiri()
