@@ -170,8 +170,10 @@ class RegisterViewModel @Inject constructor(
         val otp = authRepository.kirimOtp(data.noHp)
         _state.update {
             it.copy(
-                kode = otp.kodeDev.orEmpty(),
-                kodeTerisiOtomatis = otp.kodeDev != null,
+                // Kolom kode selalu mulai kosong: pengguna mengetik sendiri kode yang diterima.
+                // (Server mode uji tetap mengirim kodeDev, tapi app sengaja tidak memakainya.)
+                kode = "",
+                kodeTerisiOtomatis = false,
                 bisaKirimUlangPada = SystemClock.elapsedRealtime() + otp.kirimUlangDetik * 1000L,
             )
         }
