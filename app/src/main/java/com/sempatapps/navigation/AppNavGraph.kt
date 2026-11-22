@@ -135,11 +135,21 @@ fun AppNavGraph() {
 
         composable<HomeRoute> { entry ->
             val route = entry.toRoute<HomeRoute>()
-            val viewModel: HomeViewModel = hiltViewModel()
-            LaunchedEffect(route.role) {
-                viewModel.refresh(route.role)
+            if (route.role == HomeRole.RECIPIENT) {
+                PenerimaApp(
+                    onKeluar = {
+                        navController.navigate(OnboardingRoute) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
+                    },
+                )
+            } else {
+                val viewModel: HomeViewModel = hiltViewModel()
+                LaunchedEffect(route.role) {
+                    viewModel.refresh(route.role)
+                }
+                HomeApp(role = route.role, repository = viewModel.repository)
             }
-            HomeApp(role = route.role, repository = viewModel.repository)
         }
     }
 }

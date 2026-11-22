@@ -56,6 +56,15 @@ class KtpReader @Inject constructor(
         return parser.parse(detections)
     }
 
+    /**
+     * Untuk bingkai kamera: kolom KTP yang terlihat di [frame] (sekali deteksi, tanpa OCR).
+     * Panggil dari background thread; cukup cepat untuk dijalankan berulang pada preview.
+     */
+    fun kolomTerlihat(frame: Bitmap): Set<String> =
+        detector.detect(frame)
+            .filter { it.confidence >= MIN_SKOR_BINGKAI }
+            .mapTo(mutableSetOf()) { it.label }
+
     /** Deteksi di foto penuh dan di potongan tengah (lihat [potonganKandidat]), dalam koordinat foto asli. */
     private fun deteksiSemuaPotongan(photo: Bitmap): List<DetectedBox> =
         potonganKandidat(photo.width, photo.height).flatMap { p ->
@@ -95,5 +104,6 @@ class KtpReader @Inject constructor(
         const val TAG = "KtpReader"
         const val CROP_MARGIN = 0.08f
         const val MIN_OCR_SIDE = 64
+        const val MIN_SKOR_BINGKAI = 0.35f
     }
 }
