@@ -4,7 +4,9 @@ import com.sempatapps.data.local.Sesi
 import com.sempatapps.data.local.SessionStore
 import com.sempatapps.data.remote.DaftarRequest
 import com.sempatapps.data.remote.LokasiDto
+import com.sempatapps.data.remote.ApiException
 import com.sempatapps.data.remote.SempatApi
+import com.sempatapps.domain.model.HomeRole
 import com.sempatapps.domain.model.DataDaftar
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -19,6 +21,9 @@ interface AuthRepository {
 
     /** Daftar akun baru lalu simpan sesinya di HP. */
     suspend fun daftar(tokenVerifikasi: String, data: DataDaftar, password: String)
+
+    /** Masuk dengan nomor HP + password, lalu simpan sesinya di HP. @return peran akun. */
+    suspend fun masuk(noHp: String, password: String): HomeRole
 }
 
 @Singleton
@@ -50,5 +55,13 @@ class ApiAuthRepository @Inject constructor(
             ),
         )
         sessionStore.simpan(Sesi(sesi.token, data.peran, sesi.user.nama))
+    }
+
+    override suspend fun masuk(noHp: String, password: String): HomeRole {
+        val sesi = api.masuk(noHp, password)
+        val peran = runCatching { HomeRole.valueOf(sesi.user.peran) }.getOrNull()
+            ?: throw ApiException("Peran akun tidak dikenal. Hubungi admin.")
+        sessionStore.simpan(Sesi(sesi.token, peran, sesi.user.nama))
+        return peran
     }
 }

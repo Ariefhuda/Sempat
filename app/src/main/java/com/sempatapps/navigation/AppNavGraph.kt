@@ -13,6 +13,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.sempatapps.data.repository.DummyHomeRepository
 import com.sempatapps.domain.model.HomeRole
+import com.sempatapps.presentation.auth.login.LoginScreen
 import com.sempatapps.presentation.auth.register.BuatPasswordScreen
 import com.sempatapps.presentation.auth.register.FotoKtpScreen
 import com.sempatapps.presentation.auth.register.HasilKtpScreen
@@ -56,8 +57,20 @@ fun AppNavGraph() {
         }
         composable<OnboardingRoute> {
             OnboardingScreen(
-                onLoginClick = {},
+                onLoginClick = { navController.navigate(LoginRoute) },
                 onRegisterClick = { navController.navigate(RegisterGraph) },
+            )
+        }
+
+        composable<LoginRoute> {
+            LoginScreen(
+                onBackClick = { navController.popBackStack() },
+                onDaftarClick = {
+                    navController.navigate(RegisterGraph) {
+                        popUpTo(LoginRoute) { inclusive = true }
+                    }
+                },
+                onMulai = { peran -> navController.goToHome(peran) },
             )
         }
 
