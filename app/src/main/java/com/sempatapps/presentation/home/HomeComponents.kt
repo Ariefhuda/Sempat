@@ -71,6 +71,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.text.style.TextDecoration
 import com.sempatapps.R
 import com.sempatapps.core.designsystem.*
+import com.sempatapps.core.designsystem.component.BackButton
 import com.sempatapps.data.repository.DummyHomeRepository
 import com.sempatapps.data.repository.HomeRepository
 import com.sempatapps.domain.model.*
@@ -83,7 +84,7 @@ internal fun NoticeButton(count: Int, onClick: () -> Unit) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Image(painterResource(R.drawable.ic_bell), contentDescription = "Buka notifikasi", modifier = Modifier.size(22.dp))
             if (count > 0) {
-                Box(Modifier.align(Alignment.TopEnd).offset(x = (-8).dp, y = 8.dp).size(9.dp).background(SecondaryOrange, CircleShape))
+                Box(Modifier.align(Alignment.TopEnd).offset(x = (-8).dp, y = 8.dp).size(9.dp).background(IndicatorActive, CircleShape))
             }
         }
     }
@@ -107,8 +108,8 @@ internal fun DonorActivityRow(donations: List<Donation>, onDonation: (Donation) 
 internal fun DonorActivityCard(donation: Donation, onClick: () -> Unit) {
     val badgeColor = when (donation.status.lowercase()) {
         "aktif" -> StatusActiveBlue
-        "selesai" -> SecondaryDarkOrange
-        else -> PrimaryNormal
+        "selesai" -> SecondaryDark
+        else -> Primary
     }
 
     Box(Modifier.width(166.dp).padding(top = 8.dp)) {
@@ -119,7 +120,7 @@ internal fun DonorActivityCard(donation: Donation, onClick: () -> Unit) {
                 .clickable(onClick = onClick),
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = Canvas),
-            border = BorderStroke(1.dp, PrimaryNormal),
+            border = BorderStroke(1.dp, Primary),
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
             Column {
@@ -138,10 +139,11 @@ internal fun DonorActivityCard(donation: Donation, onClick: () -> Unit) {
                     verticalArrangement = Arrangement.SpaceBetween
                 ) {
                     Column {
-                        Text(donation.category, color = Color(0xFF767474), fontSize = 12.sp, maxLines = 1)
+                        Text(donation.category, color = Placeholder, fontFamily = Figtree, fontSize = 12.sp, maxLines = 1)
                         Text(
                             donation.name,
                             color = Color(0xFF1E1E1E),
+                            fontFamily = Figtree,
                             fontWeight = FontWeight.Bold,
                             fontSize = 17.sp,
                             maxLines = 1,
@@ -153,8 +155,8 @@ internal fun DonorActivityCard(donation: Donation, onClick: () -> Unit) {
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.Bottom
                     ) {
-                        Text("Berat", color = Color(0xFF767474), fontSize = 14.sp)
-                        Text(donation.quantity, color = PrimaryNormal, fontSize = 19.sp, fontWeight = FontWeight.Bold)
+                        Text("Berat", color = Placeholder, fontFamily = Figtree, fontSize = 14.sp)
+                        Text(donation.quantity, color = Primary, fontFamily = Figtree, fontSize = 19.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -172,6 +174,7 @@ internal fun DonorActivityCard(donation: Donation, onClick: () -> Unit) {
                 Text(
                     text = donation.status,
                     color = Color.White,
+                    fontFamily = Figtree,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
@@ -234,35 +237,25 @@ internal fun RecommendationCard(donation: Donation, onClick: () -> Unit) {
 @Composable
 internal fun PageTitle(title: String, onBack: () -> Unit) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Surface(
-            onClick = onBack,
-            shape = RoundedCornerShape(28.dp),
-            color = PrimaryLight,
-            modifier = Modifier
-                .width(74.dp)
-                .height(48.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Text("‹", color = PrimaryDark, fontSize = 34.sp, fontWeight = FontWeight.Bold)
-            }
-        }
+        BackButton(onBackClick = onBack)
         Spacer(Modifier.width(17.dp))
-        Text(title, color = Ink, fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
+        Text(title, style = Heading2, color = Ink)
     }
 }
 
 @Composable
 internal fun SectionTitle(title: String) {
-    Text(title, color = Color.Black, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+    Text(title, style = Heading3, color = Color.Black)
 }
 
 @Composable
 internal fun SectionHeading(title: String, onAll: () -> Unit) {
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Text(title, color = Color.Black, fontSize = 20.sp, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
+        Text(title, style = Heading3, color = Color.Black, modifier = Modifier.weight(1f))
         Text(
             "Lihat Semua",
             color = PrimaryDark,
+            fontFamily = Figtree,
             fontSize = 15.sp,
             fontWeight = FontWeight.Bold,
             textDecoration = TextDecoration.Underline,

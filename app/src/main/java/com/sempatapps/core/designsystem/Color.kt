@@ -38,16 +38,9 @@ val ErrorBorder = Color(0xFFF3B8B0)
 val ErrorText = Color(0xFF7A1F12)
 val ShadowCard = Color(0x140A2B26)
 
-// Figma Foundation Tokens (Section 2: Donatur & Donasi Pangan)
-val PrimaryNormal = Primary
-val PrimaryLight = PaleTeal
-val InputBorder = FieldBorder
+// Warna tambahan Section 2 (Donatur & Donasi Pangan)
 val SuccessTeal = Color(0xFF25C8A8)
-val SecondaryOrange = IndicatorActive
-val SecondaryDarkOrange = SecondaryDark
 val MatchOrange = Color(0xFFDE7614)
 val StatusActiveBlue = Color(0xFF18A1C0)
-val SurfaceWhite = SurfaceLight
 val MutedDark = Color(0xFF575959)
-val BodySecondary = DisabledContent
 val DividerGray = Color(0xFFBBBFBF)

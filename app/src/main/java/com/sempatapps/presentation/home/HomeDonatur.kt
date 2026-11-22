@@ -95,7 +95,7 @@ internal fun DonorHome(
             Box(
                 Modifier
                     .matchParentSize()
-                    .background(Brush.verticalGradient(listOf(Color(0xFF3DA188), PrimaryNormal)))
+                    .background(Brush.verticalGradient(listOf(Color(0xFF3DA188), Primary)))
             )
             Image(
                 painter = painterResource(R.drawable.seller_hero),
@@ -162,7 +162,7 @@ internal fun DonorHome(
                     .fillMaxWidth()
                     .height(170.dp)
                     .clip(RoundedCornerShape(24.dp))
-                    .background(color = SecondaryDarkOrange)
+                    .background(color = SecondaryDark)
                     .clickable(onClick = onCreateDonation)
             ) {
                 Column(
@@ -211,11 +211,11 @@ private fun ImpactCard(data: HomeData, modifier: Modifier = Modifier) {
     Card(
         modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = PrimaryLight),
+        colors = CardDefaults.cardColors(containerColor = PaleTeal),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Column(Modifier.padding(horizontal = 18.dp, vertical = 14.dp)) {
-            Text("Dampakmu Hari Ini", color = MutedDark, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Text("Dampakmu Hari Ini", color = MutedDark, fontFamily = Figtree, fontSize = 13.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(8.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 ImpactValue(R.drawable.money_bag, data.donatedWeight, "Didonasikan", Modifier.weight(1f))
@@ -239,12 +239,12 @@ private fun ImpactValue(symbol: Int, value: String, label: String, modifier: Mod
             Column {
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(SpanStyle(fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)) {
+                        withStyle(SpanStyle(fontFamily = Sora, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)) {
                             append(parts.firstOrNull().orEmpty())
                         }
                         if (parts.size > 1) {
                             append(" ")
-                            withStyle(SpanStyle(fontSize = 14.sp, fontWeight = FontWeight.Bold)) {
+                            withStyle(SpanStyle(fontFamily = Figtree, fontSize = 14.sp, fontWeight = FontWeight.Bold)) {
                                 append(parts[1])
                             }
                         }
@@ -252,7 +252,7 @@ private fun ImpactValue(symbol: Int, value: String, label: String, modifier: Mod
                     color = PrimaryDark,
                     maxLines = 1
                 )
-                Text(label, color = Ink, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(label, color = Ink, fontFamily = Figtree, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
         }
     }
@@ -262,7 +262,7 @@ private fun ImpactValue(symbol: Int, value: String, label: String, modifier: Mod
 private fun ScanCard(onClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = SurfaceWhite),
+        colors = CardDefaults.cardColors(containerColor = SurfaceLight),
         elevation = CardDefaults.cardElevation(3.dp)
     ) {
         Row(
@@ -276,6 +276,7 @@ private fun ScanCard(onClick: () -> Unit) {
                 Text(
                     "Cek pangan dengan AI",
                     color = PrimaryDark,
+                    fontFamily = Figtree,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
                     lineHeight = 22.sp
@@ -284,6 +285,7 @@ private fun ScanCard(onClick: () -> Unit) {
                 Text(
                     "Foto panganmu dan dapatkan rekomendasi dalam hitungan detik",
                     color = Ink,
+                    fontFamily = Figtree,
                     fontSize = 12.sp,
                     lineHeight = 17.sp
                 )
@@ -292,7 +294,7 @@ private fun ScanCard(onClick: () -> Unit) {
                     onClick = onClick,
                     modifier = Modifier.height(44.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = PrimaryNormal,
+                        containerColor = Primary,
                         contentColor = Color.White
                     ),
                     contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
@@ -301,6 +303,7 @@ private fun ScanCard(onClick: () -> Unit) {
                     Text(
                         "Coba Sekarang",
                         color = Color.White,
+                        fontFamily = Figtree,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1

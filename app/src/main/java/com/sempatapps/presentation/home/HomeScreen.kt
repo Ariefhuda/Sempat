@@ -273,7 +273,7 @@ private fun NoticeCard(notice: HomeNotice, expanded: Boolean, onClick: () -> Uni
     Surface(
         Modifier.fillMaxWidth().clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, if (notice.isRead) InputBorder else PrimaryNormal),
+        border = androidx.compose.foundation.BorderStroke(1.dp, if (notice.isRead) FieldBorder else Primary),
         color = Canvas,
         shadowElevation = 2.dp
     ) {
@@ -290,14 +290,14 @@ private fun NoticeCard(notice: HomeNotice, expanded: Boolean, onClick: () -> Uni
             }
             Spacer(Modifier.width(20.dp))
             Column(Modifier.weight(1f)) {
-                Text(notice.title, color = PrimaryDark, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Text(notice.title, color = PrimaryDark, fontFamily = Figtree, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                 Spacer(Modifier.height(2.dp))
                 val formattedBody = buildAnnotatedString {
                     val hl = notice.highlightText
                     val idx = if (hl.isNotEmpty()) notice.message.indexOf(hl) else -1
                     if (idx >= 0) {
                         append(notice.message.substring(0, idx))
-                        withStyle(SpanStyle(color = PrimaryNormal, fontWeight = FontWeight.Medium)) {
+                        withStyle(SpanStyle(color = Primary, fontWeight = FontWeight.Medium)) {
                             append(hl)
                         }
                         append(notice.message.substring(idx + hl.length))
@@ -308,6 +308,7 @@ private fun NoticeCard(notice: HomeNotice, expanded: Boolean, onClick: () -> Uni
                 Text(
                     text = formattedBody,
                     color = Ink,
+                    fontFamily = Figtree,
                     fontSize = 14.sp,
                     lineHeight = 20.sp,
                     maxLines = if (expanded || iconRes != null) Int.MAX_VALUE else 2,

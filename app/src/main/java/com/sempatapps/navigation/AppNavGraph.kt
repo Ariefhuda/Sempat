@@ -1,6 +1,7 @@
 package com.sempatapps.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -11,7 +12,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.sempatapps.data.repository.DummyHomeRepository
 import com.sempatapps.domain.model.HomeRole
 import com.sempatapps.presentation.auth.login.LoginScreen
 import com.sempatapps.presentation.auth.register.BuatPasswordScreen
@@ -23,6 +23,7 @@ import com.sempatapps.presentation.auth.register.PilihAlamatScreen
 import com.sempatapps.presentation.auth.register.RegisterScreen
 import com.sempatapps.presentation.auth.register.RegisterViewModel
 import com.sempatapps.presentation.home.HomeApp
+import com.sempatapps.presentation.home.HomeViewModel
 import com.sempatapps.presentation.onboarding.OnboardingScreen
 import com.sempatapps.presentation.splash.SplashScreen
 import com.sempatapps.presentation.splash.SplashViewModel
@@ -134,8 +135,11 @@ fun AppNavGraph() {
 
         composable<HomeRoute> { entry ->
             val route = entry.toRoute<HomeRoute>()
-            val repository = remember { DummyHomeRepository() }
-            HomeApp(role = route.role, repository = repository)
+            val viewModel: HomeViewModel = hiltViewModel()
+            LaunchedEffect(route.role) {
+                viewModel.refresh(route.role)
+            }
+            HomeApp(role = route.role, repository = viewModel.repository)
         }
     }
 }

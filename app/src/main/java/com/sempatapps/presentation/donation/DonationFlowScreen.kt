@@ -85,22 +85,29 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.sempatapps.R
-import com.sempatapps.core.designsystem.BodySecondary
 import com.sempatapps.core.designsystem.Canvas as CanvasBg
+import com.sempatapps.core.designsystem.DisabledContent
 import com.sempatapps.core.designsystem.DividerGray
+import com.sempatapps.core.designsystem.FieldBorder
+import com.sempatapps.core.designsystem.Figtree
+import com.sempatapps.core.designsystem.Heading2
+import com.sempatapps.core.designsystem.IndicatorActive
 import com.sempatapps.core.designsystem.Ink
-import com.sempatapps.core.designsystem.InputBorder
 import com.sempatapps.core.designsystem.MatchOrange
 import com.sempatapps.core.designsystem.Muted
+import com.sempatapps.core.designsystem.PaleTeal
+import com.sempatapps.core.designsystem.Placeholder
+import com.sempatapps.core.designsystem.Primary
 import com.sempatapps.core.designsystem.PrimaryDark
-import com.sempatapps.core.designsystem.PrimaryLight
 import com.sempatapps.core.designsystem.PrimaryLightActive
 import com.sempatapps.core.designsystem.PrimaryLightHover
-import com.sempatapps.core.designsystem.PrimaryNormal
-import com.sempatapps.core.designsystem.SecondaryDarkOrange
-import com.sempatapps.core.designsystem.SecondaryOrange
+import com.sempatapps.core.designsystem.SecondaryDark
+import com.sempatapps.core.designsystem.Sora
 import com.sempatapps.core.designsystem.SuccessTeal
-import com.sempatapps.core.designsystem.SurfaceWhite
+import com.sempatapps.core.designsystem.SurfaceLight
+import com.sempatapps.core.designsystem.component.BackButton
+import com.sempatapps.core.designsystem.component.PrimaryButton
+import com.sempatapps.core.designsystem.component.SecondaryButton
 import com.sempatapps.domain.model.Donation
 import com.sempatapps.domain.model.DonationRecipient
 import com.sempatapps.domain.model.FoodCheckResult
@@ -307,30 +314,13 @@ internal fun DonationBackHeader(
             .padding(horizontal = 20.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Surface(
-            onClick = onBack,
-            shape = RoundedCornerShape(28.dp),
-            color = PrimaryLight,
-            modifier = Modifier
-                .width(74.dp)
-                .height(48.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Rounded.KeyboardArrowLeft,
-                    contentDescription = "Kembali",
-                    tint = PrimaryDark,
-                    modifier = Modifier.size(34.dp)
-                )
-            }
-        }
+        BackButton(onBackClick = onBack)
         if (!title.isNullOrBlank()) {
             Spacer(Modifier.width(17.dp))
             Text(
                 text = title,
-                color = Ink,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.ExtraBold
+                style = Heading2,
+                color = Ink
             )
         }
     }
@@ -383,7 +373,7 @@ private fun DonationFormScreen(
                     .clickable(onClick = onTakePhotoClick),
                 shape = RoundedCornerShape(24.dp),
                 color = CanvasBg,
-                border = BorderStroke(1.dp, PrimaryNormal),
+                border = BorderStroke(1.dp, Primary),
                 shadowElevation = 2.dp
             ) {
                 if (state.selectedPhotoName == null) {
@@ -395,7 +385,7 @@ private fun DonationFormScreen(
                         Box(
                             modifier = Modifier
                                 .size(56.dp)
-                                .background(PrimaryNormal, CircleShape),
+                                .background(Primary, CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -434,7 +424,7 @@ private fun DonationFormScreen(
                                 .height(46.dp),
                             shape = RoundedCornerShape(24.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = PrimaryNormal,
+                                containerColor = Primary,
                                 contentColor = Color.White
                             ),
                             contentPadding = PaddingValues(horizontal = 20.dp)
@@ -481,7 +471,7 @@ private fun DonationFormScreen(
                     .height(60.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(Color.White)
-                    .border(1.dp, InputBorder, RoundedCornerShape(12.dp))
+                    .border(1.dp, FieldBorder, RoundedCornerShape(12.dp))
                     .padding(start = 12.dp, end = 10.dp),
                 contentAlignment = Alignment.CenterStart
             ) {
@@ -527,7 +517,7 @@ private fun DonationFormScreen(
                             )
                             Text(
                                 text = state.weightUnit.shortLabel,
-                                color = PrimaryNormal,
+                                color = Primary,
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.ExtraBold
                             )
@@ -566,8 +556,8 @@ private fun DonationFormScreen(
                             .width(120.dp)
                             .height(140.dp),
                         shape = RoundedCornerShape(12.dp),
-                        color = if (isSelected) PrimaryLight else Color.White,
-                        border = BorderStroke(if (isSelected) 2.dp else 1.dp, PrimaryNormal),
+                        color = if (isSelected) PaleTeal else Color.White,
+                        border = BorderStroke(if (isSelected) 2.dp else 1.dp, Primary),
                         shadowElevation = 4.dp
                     ) {
                         Column(
@@ -617,11 +607,9 @@ private fun DonationFormScreen(
                     )
                 }
             } else {
-                PrimaryPillButton(
+                PrimaryButton(
                     text = "Cek Pangan dengan AI",
-                    onClick = onCheckWithAi,
-                    modifier = Modifier.fillMaxWidth(),
-                    heightDp = 54
+                    onClick = onCheckWithAi
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
@@ -651,7 +639,7 @@ private fun DonationInputBox(
             .height(60.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(Color.White)
-            .border(1.dp, InputBorder, RoundedCornerShape(12.dp))
+            .border(1.dp, FieldBorder, RoundedCornerShape(12.dp))
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.CenterStart
     ) {
@@ -714,7 +702,7 @@ private fun CameraCaptureScreen(
         ) {
             val stroke = 4.dp.toPx()
             val cornerLen = 46.dp.toPx()
-            val bracketColor = PrimaryNormal
+            val bracketColor = Primary
 
             // Top-left
             drawLine(bracketColor, Offset(0f, 0f), Offset(cornerLen, 0f), strokeWidth = stroke, cap = StrokeCap.Round)
@@ -745,7 +733,7 @@ private fun CameraCaptureScreen(
                     .height(44.dp),
                 shape = RoundedCornerShape(24.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = PrimaryNormal,
+                    containerColor = Primary,
                     contentColor = Color.White
                 ),
                 contentPadding = PaddingValues(horizontal = 16.dp)
@@ -777,7 +765,7 @@ private fun CameraCaptureScreen(
             Surface(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp),
-                color = SurfaceWhite,
+                color = SurfaceLight,
                 shadowElevation = 8.dp
             ) {
                 Box(
@@ -791,7 +779,7 @@ private fun CameraCaptureScreen(
                         modifier = Modifier
                             .size(width = 81.dp, height = 76.dp)
                             .clip(CircleShape)
-                            .background(PrimaryNormal)
+                            .background(Primary)
                             .clickable { onCapturePhoto("bread_photo") },
                         contentAlignment = Alignment.Center
                     ) {
@@ -812,7 +800,7 @@ private fun CameraCaptureScreen(
         ModalBottomSheet(
             onDismissRequest = { showGallerySheet = false },
             sheetState = sheetState,
-            containerColor = SurfaceWhite,
+            containerColor = SurfaceLight,
             shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
             dragHandle = {
                 Box(
@@ -821,7 +809,7 @@ private fun CameraCaptureScreen(
                         .width(140.dp)
                         .height(8.dp)
                         .clip(RoundedCornerShape(12.dp))
-                        .background(PrimaryNormal)
+                        .background(Primary)
                 )
             }
         ) {
@@ -856,8 +844,8 @@ private fun CameraCaptureScreen(
                                     .padding(8.dp)
                                     .size(28.dp)
                                     .clip(CircleShape)
-                                    .background(if (isSelected) PrimaryNormal else Color.White.copy(alpha = 0.85f))
-                                    .border(2.dp, PrimaryNormal, CircleShape),
+                                    .background(if (isSelected) Primary else Color.White.copy(alpha = 0.85f))
+                                    .border(2.dp, Primary, CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (isSelected) {
@@ -873,7 +861,7 @@ private fun CameraCaptureScreen(
                     }
                 }
 
-                SecondaryPillButton(
+                SecondaryButton(
                     text = "Pilih Foto",
                     onClick = {
                         val chosen = selectedGalleryOption ?: sampleGalleryPhotos.first()
@@ -884,8 +872,7 @@ private fun CameraCaptureScreen(
                         .align(Alignment.BottomCenter)
                         .navigationBarsPadding()
                         .padding(bottom = 16.dp)
-                        .width(179.dp),
-                    heightDp = 54
+                        .width(179.dp)
                 )
             }
         }
@@ -908,7 +895,7 @@ private fun CameraTipBanner(text: String, modifier: Modifier = Modifier) {
             Icon(
                 imageVector = Icons.Rounded.Error,
                 contentDescription = null,
-                tint = SecondaryOrange,
+                tint = IndicatorActive,
                 modifier = Modifier.size(24.dp)
             )
             Text(
@@ -951,17 +938,15 @@ private fun PhotoPreviewScreen(
                 .padding(horizontal = 16.dp, vertical = 24.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            SecondaryPillButton(
+            SecondaryButton(
                 text = "Ambil Ulang",
                 onClick = onRetake,
-                modifier = Modifier.weight(1f),
-                heightDp = 54
+                modifier = Modifier.weight(1f)
             )
-            PrimaryPillButton(
+            PrimaryButton(
                 text = "Lanjutkan",
                 onClick = onContinue,
-                modifier = Modifier.weight(1f),
-                heightDp = 54
+                modifier = Modifier.weight(1f)
             )
         }
     }
@@ -1061,7 +1046,7 @@ internal fun AiBusyScreen(
         Spacer(Modifier.height(12.dp))
         Text(
             text = "AI sedang sibuk",
-            color = PrimaryNormal,
+            color = Primary,
             fontSize = 22.sp,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center
@@ -1069,25 +1054,21 @@ internal fun AiBusyScreen(
         Spacer(Modifier.height(10.dp))
         Text(
             text = "Banyak yang sedang memakai pemeriksaan AI. Coba lagi sebentar, atau isi data panganmu sendiri.",
-            color = BodySecondary,
+            color = DisabledContent,
             fontSize = 16.sp,
             lineHeight = 23.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
         Spacer(Modifier.weight(1.2f))
-        PrimaryPillButton(
+        PrimaryButton(
             text = "Coba Lagi",
-            onClick = onRetry,
-            modifier = Modifier.fillMaxWidth(),
-            heightDp = 54
+            onClick = onRetry
         )
         Spacer(Modifier.height(12.dp))
-        SecondaryPillButton(
+        SecondaryButton(
             text = "Isi Data Sendiri",
-            onClick = onManualFill,
-            modifier = Modifier.fillMaxWidth(),
-            heightDp = 54
+            onClick = onManualFill
         )
     }
 }
@@ -1149,7 +1130,7 @@ private fun FoodCheckResultScreen(
                                 .fillMaxWidth()
                                 .height(202.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .border(1.dp, PrimaryNormal, RoundedCornerShape(12.dp)),
+                                .border(1.dp, Primary, RoundedCornerShape(12.dp)),
                             contentScale = ContentScale.Crop
                         )
                         Spacer(Modifier.height(16.dp))
@@ -1188,7 +1169,7 @@ private fun FoodCheckResultScreen(
                         // LAYAK DIDONASIKAN badge
                         Surface(
                             shape = RoundedCornerShape(6.dp),
-                            color = SecondaryDarkOrange
+                            color = SecondaryDark
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
@@ -1198,12 +1179,12 @@ private fun FoodCheckResultScreen(
                                 Icon(
                                     imageVector = Icons.Rounded.ThumbUp,
                                     contentDescription = null,
-                                    tint = PrimaryLight,
+                                    tint = PaleTeal,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Text(
                                     text = "LAYAK DIDONASIKAN",
-                                    color = PrimaryLight,
+                                    color = PaleTeal,
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold
                                 )
@@ -1219,7 +1200,7 @@ private fun FoodCheckResultScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(24.dp),
                     color = CanvasBg,
-                    border = BorderStroke(1.dp, PrimaryNormal),
+                    border = BorderStroke(1.dp, Primary),
                     shadowElevation = 2.dp
                 ) {
                     Row(
@@ -1244,7 +1225,7 @@ private fun FoodCheckResultScreen(
                             Text(
                                 text = buildAnnotatedString {
                                     append("Kondisi pangan masih baik dan cocok ")
-                                    withStyle(SpanStyle(color = PrimaryNormal, fontWeight = FontWeight.Medium)) {
+                                    withStyle(SpanStyle(color = Primary, fontWeight = FontWeight.Medium)) {
                                         append("didonasikan")
                                     }
                                     append(" ke yang membutuhkan")
@@ -1267,7 +1248,7 @@ private fun FoodCheckResultScreen(
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth(),
             shape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
-            color = SurfaceWhite,
+            color = SurfaceLight,
             shadowElevation = 10.dp
         ) {
             Column(
@@ -1277,11 +1258,9 @@ private fun FoodCheckResultScreen(
                     .padding(horizontal = 20.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                PrimaryPillButton(
+                PrimaryButton(
                     text = "Ayo Donasikan",
-                    onClick = onDonateClick,
-                    modifier = Modifier.fillMaxWidth(),
-                    heightDp = 54
+                    onClick = onDonateClick
                 )
                 Spacer(Modifier.height(8.dp))
                 Text(
@@ -1417,7 +1396,7 @@ private fun SortOptionRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(if (selected) PrimaryNormal else CanvasBg)
+            .background(if (selected) Primary else CanvasBg)
             .clickable(onClick = onClick)
             .padding(horizontal = 12.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -1427,7 +1406,7 @@ private fun SortOptionRow(
             modifier = Modifier
                 .size(14.dp)
                 .clip(CircleShape)
-                .background(if (selected) SecondaryOrange else Color.Transparent)
+                .background(if (selected) IndicatorActive else Color.Transparent)
                 .border(
                     width = 1.5.dp,
                     color = if (selected) Color.White else Muted,
@@ -1456,7 +1435,7 @@ private fun RecipientCard(
                 .height(260.dp),
             shape = RoundedCornerShape(12.dp),
             color = CanvasBg,
-            border = BorderStroke(1.dp, PrimaryNormal),
+            border = BorderStroke(1.dp, Primary),
             shadowElevation = 4.dp
         ) {
             Column(
@@ -1488,7 +1467,7 @@ private fun RecipientCard(
                     )
                     Text(
                         text = recipient.needCategory,
-                        color = PrimaryNormal,
+                        color = Primary,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 1,
@@ -1515,13 +1494,12 @@ private fun RecipientCard(
                     )
                 }
 
-                PrimaryPillButton(
+                SmallPrimaryButton(
                     text = "Donasikan",
                     onClick = onDonate,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 4.dp),
-                    heightDp = 44
+                        .padding(horizontal = 4.dp)
                 )
             }
         }
@@ -1537,7 +1515,7 @@ private fun RecipientCard(
                 bottomEnd = 12.dp,
                 bottomStart = 0.dp
             ),
-            color = SecondaryDarkOrange
+            color = SecondaryDark
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 5.dp),

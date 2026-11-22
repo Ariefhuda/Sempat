@@ -2,7 +2,9 @@ package com.sempatapps.core.di
 
 import com.sempatapps.BuildConfig
 import com.sempatapps.data.repository.ApiAuthRepository
+import com.sempatapps.data.repository.ApiHomeRepository
 import com.sempatapps.data.repository.AuthRepository
+import com.sempatapps.data.repository.HomeRepository
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -40,4 +42,7 @@ object NetworkModule {
 abstract class RepositoryModule {
     @Binds
     abstract fun authRepository(impl: ApiAuthRepository): AuthRepository
+
+    @Binds
+    abstract fun homeRepository(impl: ApiHomeRepository): HomeRepository
 }
