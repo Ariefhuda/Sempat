@@ -1,5 +1,6 @@
 package com.sempatapps.presentation.auth.register
 
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.SystemClock
 import android.util.Log
@@ -7,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sempatapps.ai.ktp.FotoKtpLoader
 import com.sempatapps.ai.ktp.KtpReader
+import com.sempatapps.ai.ktp.ktpTerlihat
 import com.sempatapps.data.location.AlamatGeocoder
 import com.sempatapps.data.location.Koordinat
 import com.sempatapps.data.remote.ApiException
@@ -66,6 +68,9 @@ class RegisterViewModel @Inject constructor(
     // ---- Foto KTP ----
 
     fun uriFotoBaru(): Uri = fotoLoader.buatUriBaru()
+
+    /** Dipanggil kamera untuk tiap preview (dari background thread): apakah KTP ada di dalam bingkai? */
+    fun ktpDalamBingkai(frame: Bitmap): Boolean = ktpTerlihat(ktpReader.kolomTerlihat(frame))
 
     fun bacaKtp(uri: Uri, onTerbaca: () -> Unit) {
         _state.update { it.copy(statusScan = StatusScan.MEMBACA) }
@@ -170,10 +175,10 @@ class RegisterViewModel @Inject constructor(
         val otp = authRepository.kirimOtp(data.noHp)
         _state.update {
             it.copy(
-                // Kolom kode selalu mulai kosong: pengguna mengetik sendiri kode yang diterima.
-                // (Server mode uji tetap mengirim kodeDev, tapi app sengaja tidak memakainya.)
-                kode = "",
-                kodeTerisiOtomatis = false,
+                // Selama server mode uji (OTP_DEV_MODE), kodeDev ikut dikirim dan langsung diisikan.
+                // Di produksi kodeDev selalu null, jadi pengguna mengetik kode dari WhatsApp/SMS.
+                kode = otp.kodeDev.orEmpty(),
+                kodeTerisiOtomatis = otp.kodeDev != null,
                 bisaKirimUlangPada = SystemClock.elapsedRealtime() + otp.kirimUlangDetik * 1000L,
             )
         }
