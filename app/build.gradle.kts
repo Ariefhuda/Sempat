@@ -88,6 +88,9 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.datastore.preferences)
 
+    // Gambar
+    implementation(libs.coil.compose)
+
     // Jaringan & peta
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.okhttp)
