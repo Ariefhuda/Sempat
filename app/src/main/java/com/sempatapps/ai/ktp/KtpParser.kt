@@ -46,6 +46,9 @@ class KtpParser(
             nama = cleanText(raw("name", KtpField.NAMA)),
             tanggalLahir = birthDate(raw("birth", KtpField.TANGGAL_LAHIR)),
             kabupatenKota = city(raw("province_city", KtpField.KABUPATEN_KOTA)),
+            alamat = alamatDari(best["address"]?.text.orEmpty(), best["rt_rw"]?.text.orEmpty()),
+            kelurahan = cleanKolomAlamat(best["subdistrict"]?.text.orEmpty()),
+            kecamatan = cleanKolomAlamat(best["district"]?.text.orEmpty()),
         )
 
         if (data.nik.length != 16) ragu += KtpField.NIK
@@ -94,7 +97,27 @@ class KtpParser(
 
     companion object {
         /** Kelas model yang perlu di-OCR. Kotak kelas lain dilewati oleh [KtpReader]. */
-        val LABEL_DIPAKAI = setOf("nik", "name", "birth", "province_city")
+        val LABEL_DIPAKAI = setOf("nik", "name", "birth", "province_city", "address", "rt_rw", "subdistrict", "district")
+
+        /** Judul kolom alamat yang kadang ikut terbaca, mis. "Alamat : JL ..." atau "RT/RW : 001/002". */
+        private val TITLE_ALAMAT = Regex("^(ALAMAT|RT\\s*/\\s*RW|KEL\\s*/\\s*DESA|KELURAHAN|KECAMATAN)\\b[:.]?\\s*")
+
+        internal fun cleanKolomAlamat(raw: String): String =
+            cleanText(raw)
+                .replace(TITLE_ALAMAT, "")
+                .replace(Regex("\\s+"), " ")
+                .trim(' ', ',', ':', '.', '-')
+
+        /** Gabungkan jalan dan RT/RW: "JL SETIA BUDI NO 5" + "001/002" -> "JL SETIA BUDI NO 5, RT/RW 001/002". */
+        internal fun alamatDari(jalan: String, rtRw: String): String {
+            val j = cleanKolomAlamat(jalan)
+            val r = cleanKolomAlamat(rtRw)
+            return when {
+                j.isEmpty() -> ""
+                r.isEmpty() -> j
+                else -> "$j, RT/RW $r"
+            }
+        }
 
         /** Judul kolom yang kadang ikut terbaca di crop, misal "Nama : BUDI". */
         private val TITLE_PREFIX = Regex("^(NIK|NAMA|TEMPAT\\s*/?\\s*TGL\\.?\\s*LAHIR)\\b")

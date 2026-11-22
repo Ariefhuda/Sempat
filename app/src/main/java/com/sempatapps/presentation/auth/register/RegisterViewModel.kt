@@ -106,7 +106,7 @@ class RegisterViewModel @Inject constructor(
             it.copy(
                 statusScan = StatusScan.BELUM,
                 isiManual = true,
-                data = it.data.copy(ktp = KtpData(perluDicek = KtpField.entries.toSet())),
+                data = it.data.copy(ktp = KtpData(perluDicek = setOf(KtpField.NIK, KtpField.NAMA, KtpField.TANGGAL_LAHIR, KtpField.KABUPATEN_KOTA))),
             )
         }
     }
@@ -123,6 +123,7 @@ class RegisterViewModel @Inject constructor(
                 KtpField.NAMA -> ktp.copy(nama = nilai.uppercase())
                 KtpField.TANGGAL_LAHIR -> ktp.copy(tanggalLahir = nilai.take(10))
                 KtpField.KABUPATEN_KOTA -> ktp.copy(kabupatenKota = nilai.uppercase())
+                KtpField.ALAMAT -> ktp.copy(alamat = nilai.uppercase().take(120))
             },
         )
     }
@@ -136,10 +137,34 @@ class RegisterViewModel @Inject constructor(
 
     fun pilihLokasi(titik: TitikLokasi) = updateData { it.copy(lokasi = titik) }
 
-    /** Titik awal peta: lokasi yang sudah dipilih, kalau belum ada pakai kota dari KTP. */
+    /** Titik awal peta: lokasi yang sudah dipilih, lalu alamat dari KTP, lalu kota dari KTP. */
     suspend fun titikAwalPeta(): Koordinat? =
         data.lokasi?.let { Koordinat(it.latitude, it.longitude) }
+            ?: alamatKtpLengkap().takeIf { it.isNotBlank() }?.let { geocoder.cari(it) }
             ?: data.ktp.kabupatenKota.takeIf { it.isNotBlank() }?.let { geocoder.cari(it) }
+
+    /**
+     * Kalau belum pilih lokasi dan KTP punya alamat, cari titiknya di OpenStreetMap
+     * supaya pengguna tinggal memeriksa, tidak mulai dari nol. Tidak menimpa pilihan pengguna.
+     */
+    suspend fun isiLokasiDariKtp() {
+        if (data.lokasi != null) return
+        val alamat = alamatKtpLengkap()
+        if (alamat.isBlank()) return
+        val titik = geocoder.cari(alamat) ?: return
+        if (data.lokasi == null) {
+            pilihLokasi(TitikLokasi(titik.latitude, titik.longitude, alamat = alamat.lowercase().split(" ").joinToString(" ") { kata -> kata.replaceFirstChar { it.uppercase() } }))
+        }
+    }
+
+    /** Alamat dari KTP digabung kelurahan, kecamatan, dan kota, mis. "JL SETIA BUDI NO 5, KEL X, KEC Y, KOTA MEDAN". */
+    private fun alamatKtpLengkap(): String {
+        val ktp = data.ktp
+        return listOf(ktp.alamat, ktp.kelurahan, ktp.kecamatan, ktp.kabupatenKota)
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .joinToString(", ") + if (ktp.alamat.isNotBlank()) ", Indonesia" else ""
+    }
 
     suspend fun cariTempat(nama: String): Koordinat? = geocoder.cari(nama)
 

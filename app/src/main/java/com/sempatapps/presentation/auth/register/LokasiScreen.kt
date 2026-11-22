@@ -74,6 +74,8 @@ fun LokasiScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     LaunchedEffect(Unit) { viewModel.hapusError() }
+    // Kalau KTP punya alamat, titiknya langsung dicari di OpenStreetMap (tidak menimpa pilihan pengguna).
+    LaunchedEffect(Unit) { viewModel.isiLokasiDariKtp() }
     LokasiContent(
         peran = state.data.peran,
         lokasi = state.data.lokasi,
