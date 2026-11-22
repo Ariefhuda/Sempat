@@ -15,7 +15,7 @@ import java.util.UUID
  */
 class TokenService(secret: String) {
     private val algorithm = Algorithm.HMAC256(secret)
-    private val verifier = JWT.require(algorithm).withIssuer(ISSUER).build()
+    val verifier: com.auth0.jwt.interfaces.JWTVerifier = JWT.require(algorithm).withIssuer(ISSUER).build()
 
     fun buatTokenVerifikasi(noHp: String): String = JWT.create()
         .withIssuer(ISSUER)
