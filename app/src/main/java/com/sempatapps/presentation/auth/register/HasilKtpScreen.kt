@@ -234,6 +234,9 @@ private fun KartuDataKtp(
             BarisKtp("Kota", ktp.kabupatenKota, "Kota/Kabupaten", KtpField.KABUPATEN_KOTA in kolomSalah) {
                 onKtpChange(KtpField.KABUPATEN_KOTA, it)
             }
+            BarisKtp("Alamat", ktp.alamat, "Jalan, RT/RW (opsional)", KtpField.ALAMAT in kolomSalah) {
+                onKtpChange(KtpField.ALAMAT, it)
+            }
         }
         if (!isiManual && ktp.perluDicek.isEmpty()) {
             Spacer(Modifier.height(16.dp))
