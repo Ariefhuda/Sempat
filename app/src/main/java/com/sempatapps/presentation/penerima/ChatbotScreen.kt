@@ -1,7 +1,7 @@
-package com.example.sempat
+package com.sempatapps.presentation.penerima
 
-import com.example.sempat.ui.theme.Teal
 
+import com.sempatapps.R
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

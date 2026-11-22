@@ -1,4 +1,4 @@
-package com.example.sempat.ui.theme
+package com.sempatapps.presentation.penerima
 
 import androidx.compose.ui.graphics.Color
 

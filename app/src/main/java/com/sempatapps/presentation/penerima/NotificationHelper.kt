@@ -1,5 +1,6 @@
-package com.example.sempat
+package com.sempatapps.presentation.penerima
 
+import com.sempatapps.R
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -37,7 +38,7 @@ object NotificationHelper {
         ) return
 
         // Saat notifikasi diketuk, buka MainActivity
-        val intent = Intent(context, MainActivity::class.java).apply {
+        val intent = Intent(context, com.sempatapps.MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         val pendingIntent = PendingIntent.getActivity(

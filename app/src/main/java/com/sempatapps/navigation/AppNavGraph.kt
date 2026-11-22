@@ -134,8 +134,18 @@ fun AppNavGraph() {
 
         composable<HomeRoute> { entry ->
             val route = entry.toRoute<HomeRoute>()
-            val repository = remember { DummyHomeRepository() }
-            HomeApp(role = route.role, repository = repository)
+            if (route.role == HomeRole.RECIPIENT) {
+                PenerimaApp(
+                    onKeluar = {
+                        navController.navigate(OnboardingRoute) {
+                            popUpTo(navController.graph.id) { inclusive = true }
+                        }
+                    },
+                )
+            } else {
+                val repository = remember { DummyHomeRepository() }
+                HomeApp(role = route.role, repository = repository)
+            }
         }
     }
 }

@@ -1,6 +1,5 @@
-package com.example.sempat
+package com.sempatapps.presentation.penerima
 
-import com.example.sempat.ui.theme.Teal
 
 import android.net.Uri
 import androidx.activity.compose.BackHandler

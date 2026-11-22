@@ -1,4 +1,6 @@
-package com.example.sempat
+package com.sempatapps.presentation.penerima
+
+import com.sempatapps.R
 
 // Nama gambar ilustrasi dikumpulkan di sini.
 // Kalau nanti ada gambar baru, cukup ganti satu baris di bawah ini.
