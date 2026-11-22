@@ -9,6 +9,9 @@ object SplashRoute
 @Serializable
 object OnboardingRoute
 
+@Serializable
+object LoginRoute
+
 // ---- Daftar akun (semua langkah ada di dalam RegisterGraph, berbagi satu RegisterViewModel) ----
 
 @Serializable

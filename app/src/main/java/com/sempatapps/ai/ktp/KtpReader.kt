@@ -34,9 +34,11 @@ class KtpReader @Inject constructor(
 
     /** Foto harus sudah tegak (rotasi EXIF/kamera sudah diterapkan). */
     suspend fun read(photo: Bitmap): KtpData {
-        val boxes = withContext(Dispatchers.Default) { detector.detect(photo) }
+        val boxes = withContext(Dispatchers.Default) { deteksiSemuaPotongan(photo) }
             // Kolom yang tidak dipakai form (golongan darah, agama, dst.) tidak perlu di-OCR.
             .filter { it.label in KtpParser.LABEL_DIPAKAI }
+            .let(::terbaikPerKolom)
+        Log.d(TAG, "Kolom terdeteksi: " + boxes.joinToString { "${it.label} %.2f".format(it.confidence) })
         val detections = boxes.map { box ->
             val crop = crop(photo, box)
             val text = try {
@@ -53,6 +55,18 @@ class KtpReader @Inject constructor(
         }
         return parser.parse(detections)
     }
+
+    /** Deteksi di foto penuh dan di potongan tengah (lihat [potonganKandidat]), dalam koordinat foto asli. */
+    private fun deteksiSemuaPotongan(photo: Bitmap): List<DetectedBox> =
+        potonganKandidat(photo.width, photo.height).flatMap { p ->
+            if (p.lebar == photo.width && p.tinggi == photo.height) return@flatMap detector.detect(photo)
+            val potong = Bitmap.createBitmap(photo, p.kiri, p.atas, p.lebar, p.tinggi)
+            try {
+                detector.detect(potong).map { it.geser(p) }
+            } finally {
+                if (potong !== photo) potong.recycle()
+            }
+        }
 
     /** Crop dengan sedikit kelonggaran supaya huruf di tepi kotak tidak terpotong, lalu perbesar kalau terlalu kecil. */
     private fun crop(photo: Bitmap, box: DetectedBox): Bitmap {

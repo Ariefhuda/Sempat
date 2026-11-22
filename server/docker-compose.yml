@@ -36,15 +36,34 @@ services:
       # Untuk tes dari HP/laptop di jaringan yang sama: http://IP-container:8080
       - "8080:8080"
 
+  # Lihat & ubah isi database lewat browser. Login pakai user "sempat" + DB_PASSWORD.
+  # Dari internet: https://db-sempat.ususbuntu.my.id (lewat tunnel + Cloudflare Access).
+  # Dari CT sendiri / SSH tunnel: http://localhost:8081
+  phpmyadmin:
+    image: phpmyadmin:5.2
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PMA_HOST: db
+      PMA_ABSOLUTE_URI: ${PMA_URL:-https://db-sempat.ususbuntu.my.id/}
+      UPLOAD_LIMIT: 64M
+    ports:
+      # Hanya localhost: tidak bisa dibuka dari jaringan lain kecuali lewat tunnel.
+      - "127.0.0.1:8081:80"
+
   cloudflared:
     image: cloudflare/cloudflared:latest
     restart: unless-stopped
     profiles: ["tunnel"]
     depends_on:
       - api
-    # --url: tujuan untuk tunnel yang dibuat lewat CLI (cloudflared tunnel create).
-    # Tunnel dari dashboard memakai Public Hostname di dashboard; --url ini diabaikan.
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN} --url http://api:8080
+      - phpmyadmin
+    # Hostname -> service diatur di cloudflared/config.yml (api + phpMyAdmin).
+    volumes:
+      - ./cloudflared/config.yml:/etc/cloudflared/config.yml:ro
+    command: tunnel --no-autoupdate --config /etc/cloudflared/config.yml run --token ${CLOUDFLARE_TUNNEL_TOKEN}
 
 volumes:
   db-data:

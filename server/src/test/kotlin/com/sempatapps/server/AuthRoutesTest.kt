@@ -10,9 +10,7 @@ import com.sempatapps.server.auth.KirimOtpResponse
 import com.sempatapps.server.auth.LokasiDto
 import com.sempatapps.server.auth.SesiResponse
 import com.sempatapps.server.auth.TokenService
-import com.sempatapps.server.db.KodeOtp
-import com.sempatapps.server.db.Lokasi
-import com.sempatapps.server.db.Users
+import com.sempatapps.server.db.SEMUA_TABEL
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -37,9 +35,10 @@ class AuthRoutesTest {
     private fun ApplicationTestBuilder.siapkan(): HttpClient {
         // Tiap test pakai database H2 baru di memori, mode MySQL.
         val db = Database.connect("jdbc:h2:mem:${UUID.randomUUID()};MODE=MySQL;DB_CLOSE_DELAY=-1", "org.h2.Driver")
-        transaction(db) { SchemaUtils.create(Users, Lokasi, KodeOtp) }
-        val auth = AuthService(db, TokenService("rahasia-test"), nikSecret = "nik-test", otpDevMode = true)
-        application { module(auth) }
+        transaction(db) { SchemaUtils.create(*SEMUA_TABEL) }
+        val tokens = TokenService("rahasia-test")
+        val auth = AuthService(db, tokens, nikSecret = "nik-test", otpDevMode = true)
+        application { module(Layanan.buat(db, tokens, auth)) }
         return createClient { install(ContentNegotiation) { json() } }
     }
 

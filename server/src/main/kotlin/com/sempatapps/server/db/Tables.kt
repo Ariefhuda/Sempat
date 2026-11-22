@@ -42,3 +42,70 @@ object KodeOtp : Table("kode_otp") {
 
     override val primaryKey = PrimaryKey(noHp)
 }
+
+/** Pangan yang dibagikan donatur. Status: lihat [StatusDonasi]. */
+object Donasi : Table("donasi") {
+    val id = uuid("id")
+    val donaturId = uuid("donatur_id").references(Users.id).index()
+    val nama = varchar("nama", 100)
+    val kategori = varchar("kategori", 50)
+    /** Teks bebas untuk ditampilkan, mis. "2 bungkus" atau "250 g". */
+    val jumlah = varchar("jumlah", 50)
+    /** Dipakai untuk ringkasan "sudah mendonasikan 8 kg" di beranda donatur. */
+    val beratGram = integer("berat_gram")
+    val catatan = varchar("catatan", 500).default("")
+    val fotoUrl = varchar("foto_url", 500).nullable()
+    val alamatAmbil = varchar("alamat_ambil", 255)
+    val latitude = double("latitude")
+    val longitude = double("longitude")
+    val batasAmbil = timestamp("batas_ambil")
+    val status = varchar("status", 16).index()
+    val dibuatPada = timestamp("dibuat_pada")
+    val diperbaruiPada = timestamp("diperbarui_pada")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+/** Permintaan penerima atas satu donasi. Status: lihat [StatusPengajuan]. */
+object Pengajuan : Table("pengajuan") {
+    val id = uuid("id")
+    val donasiId = uuid("donasi_id").references(Donasi.id).index()
+    val penerimaId = uuid("penerima_id").references(Users.id).index()
+    val catatan = varchar("catatan", 500).default("")
+    val buktiUrl = varchar("bukti_url", 500).nullable()
+    val status = varchar("status", 16)
+    val dibuatPada = timestamp("dibuat_pada")
+    val diperbaruiPada = timestamp("diperbarui_pada")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+object Notifikasi : Table("notifikasi") {
+    val id = uuid("id")
+    val userId = uuid("user_id").references(Users.id).index()
+    val judul = varchar("judul", 100)
+    val pesan = varchar("pesan", 255)
+    val dibaca = bool("dibaca").default(false)
+    val dibuatPada = timestamp("dibuat_pada")
+
+    override val primaryKey = PrimaryKey(id)
+}
+
+object StatusDonasi {
+    const val TERSEDIA = "TERSEDIA"     // bisa diajukan penerima
+    const val DIPROSES = "DIPROSES"     // satu pengajuan sudah disetujui, menunggu diambil
+    const val SELESAI = "SELESAI"       // sudah diterima penerima
+    const val DIBATALKAN = "DIBATALKAN"
+}
+
+object StatusPengajuan {
+    const val MENUNGGU = "MENUNGGU"
+    const val DISETUJUI = "DISETUJUI"
+    const val DITOLAK = "DITOLAK"
+    const val DITERIMA = "DITERIMA"     // penerima konfirmasi sudah menerima pangan
+    const val DIBATALKAN = "DIBATALKAN"
+    val AKTIF = listOf(MENUNGGU, DISETUJUI)
+}
+
+/** Urutan penting: tabel yang direferensikan dibuat lebih dulu. */
+val SEMUA_TABEL = arrayOf(Users, Lokasi, KodeOtp, Donasi, Pengajuan, Notifikasi)
