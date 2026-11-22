@@ -66,16 +66,21 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import kotlinx.coroutines.launch
 import com.sempatapps.R
 import com.sempatapps.core.designsystem.*
 import com.sempatapps.data.repository.DummyHomeRepository
 import com.sempatapps.data.repository.HomeRepository
 import com.sempatapps.domain.model.*
+import com.sempatapps.presentation.donation.DonationFlowScreen
 
 // Kerangka beranda: mengatur pindah halaman dan memanggil HomeDonatur / HomePembeli.
 
-private enum class HomePage { HOME, NOTIFICATIONS, LOCATIONS, FOOD, CHAT }
+private enum class HomePage { HOME, NOTIFICATIONS, LOCATIONS, FOOD, CHAT, DONATE }
 
 private data class ChatMessage(val text: String, val fromUser: Boolean)
 
@@ -85,17 +90,17 @@ fun HomeApp(role: HomeRole, repository: HomeRepository) {
     var page by rememberSaveable { mutableStateOf(HomePage.HOME) }
     var selectedDonation by remember { mutableStateOf<Donation?>(null) }
     var showHelp by remember { mutableStateOf(false) }
-    var showFaq by remember { mutableStateOf(false) }
     val chatMessages = remember { mutableStateListOf(ChatMessage("Halo! Aku Yuk, asisten SEMPAT. Ada yang ingin kamu tanyakan tentang donasi pangan?", false)) }
     val snackbar = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     val outsideHome: (String) -> Unit = { name ->
         scope.launch { snackbar.showSnackbar("Alur $name disambungkan oleh modul terkait.") }
     }
+    val showBottomBar = page != HomePage.DONATE
 
     MaterialTheme(typography = Typography()) {
         Box(Modifier.fillMaxSize().background(Canvas)) {
-            Box(Modifier.fillMaxSize().padding(bottom = 94.dp)) {
+            Box(Modifier.fillMaxSize().padding(bottom = if (showBottomBar) 94.dp else 0.dp)) {
                 when (page) {
                     HomePage.HOME -> if (role == HomeRole.DONOR) {
                         DonorHome(
@@ -103,7 +108,7 @@ fun HomeApp(role: HomeRole, repository: HomeRepository) {
                             onNotices = { page = HomePage.NOTIFICATIONS },
                             onFood = { page = HomePage.FOOD },
                             onDonation = { selectedDonation = it },
-                            onCreateDonation = { outsideHome("donasi pangan") }
+                            onCreateDonation = { page = HomePage.DONATE }
                         )
                     } else {
                         RecipientHome(
@@ -115,6 +120,16 @@ fun HomeApp(role: HomeRole, repository: HomeRepository) {
                             onHelp = { showHelp = true }
                         )
                     }
+                    HomePage.DONATE -> DonationFlowScreen(
+                        onCloseToHome = { page = HomePage.HOME },
+                        onDonationCreated = { donation, recipientName ->
+                            repository.addDonation(donation, recipientName)
+                        },
+                        onViewDonationDetail = { donation ->
+                            page = HomePage.HOME
+                            selectedDonation = donation
+                        }
+                    )
                     HomePage.NOTIFICATIONS -> NoticesPage(data, onBack = { page = HomePage.HOME }) {
                         repository.markNoticeRead(role, it)
                     }
@@ -141,15 +156,17 @@ fun HomeApp(role: HomeRole, repository: HomeRepository) {
                     }
                 }
             }
-            HomeBottomBar(
-                role = role,
-                activePage = page,
-                onHome = { page = HomePage.HOME },
-                onFood = { page = HomePage.FOOD },
-                onOutsideHome = outsideHome,
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
-            SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(bottom = 94.dp))
+            if (showBottomBar) {
+                HomeBottomBar(
+                    role = role,
+                    activePage = page,
+                    onHome = { page = HomePage.HOME },
+                    onFood = { page = HomePage.FOOD },
+                    onOutsideHome = outsideHome,
+                    modifier = Modifier.align(Alignment.BottomCenter)
+                )
+            }
+            SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter).padding(bottom = if (showBottomBar) 94.dp else 16.dp))
         }
     }
 
@@ -228,12 +245,12 @@ private fun chatReply(question: String): String = when {
 @Composable
 private fun NoticesPage(data: HomeData, onBack: () -> Unit, onRead: (String) -> Unit) {
     var expandedId by rememberSaveable { mutableStateOf<String?>(null) }
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
+    Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(20.dp)) {
         PageTitle("Notifikasi", onBack)
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(18.dp))
         data.notices.groupBy { it.day }.forEach { (day, notices) ->
-            Text(day, color = Muted, fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(6.dp))
+            Text(day, color = Muted, fontSize = 16.sp, fontWeight = FontWeight.Bold)
+            Spacer(Modifier.height(8.dp))
             notices.forEach { notice ->
                 NoticeCard(notice, expanded = expandedId == notice.id) {
                     expandedId = if (expandedId == notice.id) null else notice.id
@@ -248,14 +265,54 @@ private fun NoticesPage(data: HomeData, onBack: () -> Unit, onRead: (String) -> 
 
 @Composable
 private fun NoticeCard(notice: HomeNotice, expanded: Boolean, onClick: () -> Unit) {
-    Surface(Modifier.fillMaxWidth().clickable(onClick = onClick), shape = RoundedCornerShape(12.dp), border = androidx.compose.foundation.BorderStroke(1.dp, if (notice.isRead) PaleTeal else Teal), color = Canvas, shadowElevation = 2.dp) {
-        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text("♡", color = Teal, fontSize = 31.sp)
-            Spacer(Modifier.width(16.dp))
-            Column {
-                Text(notice.title, color = DarkTeal, fontWeight = FontWeight.Bold, fontSize = 15.sp)
-                Text(notice.message, color = Ink, fontSize = 13.sp, lineHeight = 19.sp, maxLines = if (expanded) Int.MAX_VALUE else 1, overflow = TextOverflow.Ellipsis)
-                Text(if (expanded) "Sudah dibaca" else "Ketuk untuk membaca", color = Muted, fontSize = 11.sp)
+    val iconRes = when (notice.iconName) {
+        "picked_up" -> R.drawable.ic_notif_picked_up
+        "donated" -> R.drawable.ic_notif_donated
+        else -> null
+    }
+    Surface(
+        Modifier.fillMaxWidth().clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, if (notice.isRead) InputBorder else PrimaryNormal),
+        color = Canvas,
+        shadowElevation = 2.dp
+    ) {
+        Row(Modifier.padding(horizontal = 18.dp, vertical = 15.dp), verticalAlignment = Alignment.CenterVertically) {
+            if (iconRes != null) {
+                Image(
+                    painter = painterResource(iconRes),
+                    contentDescription = notice.title,
+                    modifier = Modifier.size(width = 61.dp, height = 67.dp),
+                    contentScale = ContentScale.Fit
+                )
+            } else {
+                Text("♡", color = Teal, fontSize = 31.sp)
+            }
+            Spacer(Modifier.width(20.dp))
+            Column(Modifier.weight(1f)) {
+                Text(notice.title, color = PrimaryDark, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                Spacer(Modifier.height(2.dp))
+                val formattedBody = buildAnnotatedString {
+                    val hl = notice.highlightText
+                    val idx = if (hl.isNotEmpty()) notice.message.indexOf(hl) else -1
+                    if (idx >= 0) {
+                        append(notice.message.substring(0, idx))
+                        withStyle(SpanStyle(color = PrimaryNormal, fontWeight = FontWeight.Medium)) {
+                            append(hl)
+                        }
+                        append(notice.message.substring(idx + hl.length))
+                    } else {
+                        append(notice.message)
+                    }
+                }
+                Text(
+                    text = formattedBody,
+                    color = Ink,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    maxLines = if (expanded || iconRes != null) Int.MAX_VALUE else 2,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }

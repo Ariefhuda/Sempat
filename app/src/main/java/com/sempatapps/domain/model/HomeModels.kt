@@ -18,7 +18,9 @@ data class HomeNotice(
     val title: String,
     val message: String,
     val day: String,
-    val isRead: Boolean = false
+    val isRead: Boolean = false,
+    val highlightText: String = "",
+    val iconName: String = ""
 )
 
 data class PickupLocation(
@@ -41,3 +43,24 @@ data class HomeData(
     val selectedLocation: PickupLocation?
         get() = locations.firstOrNull { it.id == selectedLocationId }
 }
+
+data class DonationRecipient(
+    val id: String,
+    val type: String,
+    val name: String,
+    val needCategory: String,
+    val matchPercent: Int,
+    val distanceKm: Double,
+    val urgencyRank: Int
+)
+
+data class FoodCheckResult(
+    val name: String,
+    val category: String,
+    val weightLabel: String,
+    val condition: String,
+    val shelfLife: String,
+    val isEligible: Boolean,
+    val recommendation: String,
+    val imageName: String
+)
