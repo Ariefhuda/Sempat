@@ -1,0 +1,56 @@
+# CI app Android: unit test + build APK debug.
+# APK bisa diunduh dari halaman run (bagian Artifacts) untuk dicoba di HP.
+name: App
+
+on:
+  push:
+    paths-ignore:
+      - "server/**"
+      - "**.md"
+      - ".github/workflows/server.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: app-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      # Android SDK sudah terpasang di runner ubuntu-latest (ANDROID_HOME);
+      # platform yang belum ada diunduh otomatis oleh Gradle.
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      # Alamat server diambil dari Settings > Secrets and variables > Actions > Variables > SEMPAT_API_URL.
+      # Kalau belum diisi, APK memakai default http://10.0.2.2:8080/ (server di laptop, untuk emulator).
+      - name: Unit test + build APK
+        env:
+          SEMPAT_API_URL: ${{ vars.SEMPAT_API_URL }}
+        run: |
+          ARGS=""
+          if [ -n "$SEMPAT_API_URL" ]; then ARGS="-Psempat.apiUrl=$SEMPAT_API_URL"; fi
+          ./gradlew --no-daemon $ARGS :app:testDebugUnitTest :app:assembleDebug
+
+      - name: Simpan laporan test kalau gagal
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: laporan-test-app
+          path: app/build/reports/tests/
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: sempat-debug-${{ github.sha }}
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 14

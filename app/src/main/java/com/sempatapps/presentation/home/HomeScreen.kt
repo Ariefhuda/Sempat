@@ -100,7 +100,7 @@ fun HomeApp(role: HomeRole, repository: HomeRepository) {
 
     MaterialTheme(typography = Typography()) {
         Box(Modifier.fillMaxSize().background(Canvas)) {
-            Box(Modifier.fillMaxSize().padding(bottom = if (showBottomBar) 94.dp else 0.dp)) {
+            Box(Modifier.fillMaxSize().padding(bottom = if (page == HomePage.CHAT) 94.dp else 0.dp)) {
                 when (page) {
                     HomePage.HOME -> if (role == HomeRole.DONOR) {
                         DonorHome(
@@ -148,7 +148,7 @@ fun HomeApp(role: HomeRole, repository: HomeRepository) {
                 if (page == HomePage.HOME && role == HomeRole.RECIPIENT) {
                     Button(
                         onClick = { page = HomePage.CHAT },
-                        modifier = Modifier.align(Alignment.BottomEnd).padding(end = 20.dp, bottom = 12.dp),
+                        modifier = Modifier.align(Alignment.BottomEnd).navigationBarsPadding().padding(end = 20.dp, bottom = 96.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Teal),
                         shape = RoundedCornerShape(32.dp)
                     ) {
@@ -340,13 +340,14 @@ private fun LocationsPage(data: HomeData, onBack: () -> Unit, onSelect: (String)
 
 @Composable
 private fun FoodPage(data: HomeData, onBack: () -> Unit, onDonation: (Donation) -> Unit) {
-    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp)) {
+    Column(Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState()).padding(20.dp)) {
         PageTitle(if (data.role == HomeRole.DONOR) "Pangan Saya" else "Donasi Terdekat", onBack)
         Spacer(Modifier.height(20.dp))
         data.donations.forEach { donation ->
             RecommendationCard(donation) { onDonation(donation) }
             Spacer(Modifier.height(12.dp))
         }
+        Spacer(Modifier.navigationBarsPadding().height(96.dp))
     }
 }
 
@@ -370,7 +371,7 @@ private fun DonationDialog(donation: Donation, onDismiss: () -> Unit) {
 
 @Composable
 private fun HomeBottomBar(role: HomeRole, activePage: HomePage, onHome: () -> Unit, onFood: () -> Unit, onOutsideHome: (String) -> Unit, modifier: Modifier = Modifier) {
-    Box(modifier.fillMaxWidth().background(Canvas).navigationBarsPadding().padding(horizontal = 20.dp, vertical = 6.dp)) {
+    Box(modifier.fillMaxWidth().navigationBarsPadding().padding(horizontal = 20.dp, vertical = 10.dp)) {
         Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(38.dp), color = Canvas, shadowElevation = 9.dp) {
             Row(Modifier.fillMaxWidth().height(70.dp), horizontalArrangement = Arrangement.SpaceAround, verticalAlignment = Alignment.CenterVertically) {
                 NavItem(R.drawable.ic_home, "Beranda", activePage == HomePage.HOME, onHome)

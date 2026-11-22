@@ -10,19 +10,44 @@ val Muted = Color(0xFF7D7B7B)
 val Canvas = Color(0xFFF9FFFE)
 val Orange = Color(0xFFFF861C)
 
+// Warna dari Figma (onboarding & register). Nama mengikuti style "Foundation/..." di Figma.
+val Primary = Color(0xFF0E7C66) // Foundation/Primary/Normal
+val PrimaryDark = Color(0xFF0B5F4F) // Foundation/Primary/Dark
+val PrimaryDarker = Color(0xFF09453E) // Foundation/Primary/Darker
+val SecondaryLight = Color(0xFFFFF3E8) // Foundation/Secondary/Light
+val Heading = Color(0xFF0C0C0C)
+val DisabledSurface = Color(0xFFDDE5E2)
+val DisabledContent = Color(0xFF55625D)
+val IndicatorActive = Color(0xFFFD8617) // Foundation/Secondary/Normal
+val IndicatorInactive = Color(0xFFDEDEDE)
+val ShadowSoft = Color(0x26000000)
+val ShadowFaint = Color(0x0D000000)
+
+// Warna tambahan untuk layar register (Foto KTP, Hasil Baca KTP, Lokasi, OTP, Password)
+val PrimaryLightActive = Color(0xFFB8EDE7) // Foundation/Primary/Light :active
+val PrimaryLightHover = Color(0xFFDDF6F3) // Foundation/Primary/Light :hover
+val SecondaryLightActive = Color(0xFFFED9B7) // Foundation/Secondary/Light :active
+val SecondaryDark = Color(0xFFB84E08) // badge "Langkah terakhir", "DATA TERBACA"
+val SurfaceLight = Color(0xFFFEFFFF) // Foundation/Tertiary/Light: panel bawah & pop-up
+val FieldBorder = Color(0xFFBFE5DE)
+val Placeholder = Color(0xFF767474)
+val HelperText = Color(0xFF6B7875)
+val InfoText = Color(0xFF1F4D44)
+val ErrorSurface = Color(0xFFFDECEA)
+val ErrorBorder = Color(0xFFF3B8B0)
+val ErrorText = Color(0xFF7A1F12)
+val ShadowCard = Color(0x140A2B26)
+
 // Figma Foundation Tokens (Section 2: Donatur & Donasi Pangan)
-val PrimaryNormal = Color(0xFF0E7C66)
-val PrimaryDark = Color(0xFF0B5F4F)
-val PrimaryLight = Color(0xFFE8F9F7)
-val PrimaryLightHover = Color(0xFFDDF6F3)
-val PrimaryLightActive = Color(0xFFB8EDE7)
-val InputBorder = Color(0xFFBFE5DE)
+val PrimaryNormal = Primary
+val PrimaryLight = PaleTeal
+val InputBorder = FieldBorder
 val SuccessTeal = Color(0xFF25C8A8)
-val SecondaryOrange = Color(0xFFFD8617)
-val SecondaryDarkOrange = Color(0xFFB84E08)
+val SecondaryOrange = IndicatorActive
+val SecondaryDarkOrange = SecondaryDark
 val MatchOrange = Color(0xFFDE7614)
 val StatusActiveBlue = Color(0xFF18A1C0)
-val SurfaceWhite = Color(0xFFFEFFFF)
+val SurfaceWhite = SurfaceLight
 val MutedDark = Color(0xFF575959)
-val BodySecondary = Color(0xFF55625D)
+val BodySecondary = DisabledContent
 val DividerGray = Color(0xFFBBBFBF)

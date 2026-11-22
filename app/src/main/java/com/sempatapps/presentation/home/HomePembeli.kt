@@ -120,7 +120,7 @@ internal fun RecipientHome(
                 RecommendationCard(donation) { onDonation(donation) }
                 Spacer(Modifier.height(10.dp))
             }
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.navigationBarsPadding().height(104.dp))
         }
     }
 }

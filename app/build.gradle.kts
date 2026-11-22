@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
@@ -20,6 +22,11 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Alamat server API. Default 10.0.2.2 = laptop sendiri kalau dijalankan dari emulator.
+        // Ganti tanpa ubah kode: tambahkan baris ini di local.properties
+        //   sempat.apiUrl=https://api.domainkamu.com/
+        buildConfigField("String", "API_URL", "\"${apiUrl()}\"")
     }
 
     buildTypes {
@@ -39,9 +46,15 @@ android {
         compose = true
         buildConfig = true
     }
+
+    // Model dimuat dengan memory-map (KtpDetector), jadi tidak boleh dikompresi di dalam APK.
+    androidResources {
+        noCompress += "tflite"
+    }
 }
 
 dependencies {
+    implementation(libs.androidx.compose.foundation)
     // Inti
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -75,11 +88,23 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.datastore.preferences)
 
+    // Jaringan & peta
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.osmdroid)
+    implementation(libs.androidx.exifinterface)
+
     // Kamera
     implementation(libs.androidx.camera.core)
     implementation(libs.androidx.camera.camera2)
     implementation(libs.androidx.camera.lifecycle)
     implementation(libs.androidx.camera.view)
+
+    // AI: deteksi kolom KTP (LiteRT) + baca teks (ML Kit, model ikut di APK, jalan offline)
+    implementation(libs.litert)
+    implementation(libs.mlkit.text.recognition)
 
     // Testing
     testImplementation(libs.junit)
@@ -89,4 +114,13 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+fun apiUrl(): String {
+    val local = Properties()
+    rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use(local::load)
+    // Urutan: local.properties, lalu -Psempat.apiUrl=... (dipakai GitHub Actions), lalu default emulator.
+    return local.getProperty("sempat.apiUrl")
+        ?: providers.gradleProperty("sempat.apiUrl").orNull
+        ?: "http://10.0.2.2:8080/"
 }

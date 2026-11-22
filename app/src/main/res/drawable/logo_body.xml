@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Figma: Splash Screen / "Subtract" (badan oranye logo). Di Figma bentuk ini dicerminkan horizontal. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="167.498dp"
+    android:height="109dp"
+    android:viewportWidth="167.498"
+    android:viewportHeight="109">
+    <group android:scaleX="-1" android:pivotX="83.749">
+        <path android:fillColor="#FD8617" android:pathData="M166.029 76.788C171.729 92.4421 160.137 109 143.477 109H11.5063C4.01378 109 -1.47786 101.95 0.356189 94.685C1.64547 89.5782 6.23929 86 11.5063 86H45.7422C51.5412 86 56.2422 81.299 56.2422 75.5C56.2422 69.701 51.5412 65 45.7422 65H20.6877C14.1725 65 9.39723 58.8694 10.9919 52.5524C12.1129 48.1116 16.1076 45 20.6877 45H63.7422C69.5412 45 74.2422 40.299 74.2422 34.5C74.2422 28.701 69.5412 24 63.7422 24H33.6059C25.7877 24 20.0573 16.6433 21.971 9.06285C23.3162 3.73388 28.1098 0 33.6059 0H121.264C131.352 0 140.364 6.30871 143.816 15.7879L166.029 76.788Z" />
+    </group>
+</vector>

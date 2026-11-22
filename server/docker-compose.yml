@@ -1,0 +1,50 @@
+# Jalankan: docker compose up -d --build
+# Dengan Cloudflare Tunnel: docker compose --profile tunnel up -d --build
+services:
+  db:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: sempat
+      MYSQL_USER: sempat
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      # -h 127.0.0.1 (bukan localhost) supaya lewat TCP: saat MySQL baru pertama inisialisasi,
+      # server sementara cuma buka socket, jadi cek ini baru lolos setelah MySQL benar-benar siap.
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u sempat -p$$MYSQL_PASSWORD --silent"]
+      interval: 5s
+      retries: 20
+    # Sengaja tidak ada "ports": database tidak bisa diakses dari luar container.
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mysql://db:3306/sempat
+      DB_USER: sempat
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      NIK_SECRET: ${NIK_SECRET}
+      OTP_DEV_MODE: ${OTP_DEV_MODE:-false}
+    ports:
+      # Untuk tes dari HP/laptop di jaringan yang sama: http://IP-container:8080
+      - "8080:8080"
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    profiles: ["tunnel"]
+    depends_on:
+      - api
+    # --url: tujuan untuk tunnel yang dibuat lewat CLI (cloudflared tunnel create).
+    # Tunnel dari dashboard memakai Public Hostname di dashboard; --url ini diabaikan.
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN} --url http://api:8080
+
+volumes:
+  db-data:
