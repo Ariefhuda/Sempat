@@ -43,6 +43,9 @@ data class DaftarRequest(
 )
 
 @Serializable
+data class MasukRequest(val noHp: String, val password: String)
+
+@Serializable
 data class UserDto(val id: String, val peran: String, val nama: String, val noHp: String)
 
 @Serializable
@@ -65,6 +68,9 @@ class SempatApi @Inject constructor(private val client: HttpClient) {
 
     suspend fun daftar(request: DaftarRequest): SesiResponse =
         post("auth/daftar", request).body()
+
+    suspend fun masuk(noHp: String, password: String): SesiResponse =
+        post("auth/masuk", MasukRequest(noHp, password)).body()
 
     private suspend inline fun <reified T : Any> post(path: String, body: T): HttpResponse {
         val response = try {
