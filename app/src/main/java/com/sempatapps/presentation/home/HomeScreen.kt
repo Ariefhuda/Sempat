@@ -121,9 +121,13 @@ fun HomeApp(role: HomeRole, repository: HomeRepository) {
                         )
                     }
                     HomePage.DONATE -> DonationFlowScreen(
+                        defaultPickupAddress = data.pickupAddress.ifBlank { "Alamat profil donatur" },
                         onCloseToHome = { page = HomePage.HOME },
                         onDonationCreated = { donation, recipientName ->
                             repository.addDonation(donation, recipientName)
+                        },
+                        onRecipientAssigned = { donation, recipientName ->
+                            repository.markDonationAssigned(donation, recipientName)
                         },
                         onViewDonationDetail = { donation ->
                             page = HomePage.HOME
@@ -357,7 +361,10 @@ private fun DonationDialog(donation: Donation, onDismiss: () -> Unit) {
     Dialog(onDismissRequest = onDismiss) {
         Card(shape = RoundedCornerShape(18.dp), colors = CardDefaults.cardColors(containerColor = Color.White)) {
             Column(Modifier.padding(18.dp)) {
-                Image(painterResource(photoRes(donation.imageName)), contentDescription = donation.name, modifier = Modifier.fillMaxWidth().height(168.dp).clip(RoundedCornerShape(12.dp)), contentScale = ContentScale.Crop)
+                DonationThumbnail(
+                    donation = donation,
+                    modifier = Modifier.fillMaxWidth().height(168.dp).clip(RoundedCornerShape(12.dp))
+                )
                 Spacer(Modifier.height(13.dp))
                 Text(donation.name, fontWeight = FontWeight.Bold, fontSize = 21.sp)
                 Text("${donation.category} · ${donation.quantity}", color = Muted)

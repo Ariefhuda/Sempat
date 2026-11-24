@@ -12,6 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -95,16 +98,32 @@ private fun SempatDialogContent(
         Text(title, style = Heading3, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
         Text(message, style = Body, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp))
         Spacer(Modifier.height(14.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(5.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+        ) {
             if (secondaryText != null) {
-                SmallButton(secondaryText, onSecondary, container = PaleTeal, content = PrimaryDark, border = BorderStroke(1.dp, PrimaryDark))
+                SmallButton(
+                    text = secondaryText,
+                    onClick = onSecondary,
+                    container = PaleTeal,
+                    content = PrimaryDark,
+                    border = BorderStroke(1.dp, PrimaryDark),
+                    modifier = Modifier.weight(1f),
+                )
             }
-            SmallButton(primaryText, onPrimary, container = Primary, content = Color.White)
+            SmallButton(
+                text = primaryText,
+                onClick = onPrimary,
+                container = Primary,
+                content = Color.White,
+                modifier = if (secondaryText != null) Modifier.weight(1f) else Modifier.widthIn(min = 144.dp),
+            )
         }
     }
 }
 
-/** Figma "Small Button Primary/Secondary": lebar 144, sudut 24. */
+/** Figma "Small Button Primary/Secondary": sudut 24, responsif agar label panjang tidak terpotong. */
 @Composable
 private fun SmallButton(
     text: String,
@@ -112,16 +131,24 @@ private fun SmallButton(
     container: Color,
     content: Color,
     border: BorderStroke? = null,
+    modifier: Modifier = Modifier,
 ) {
     Button(
         onClick = onClick,
         shape = RoundedCornerShape(24.dp),
         border = border,
         colors = ButtonDefaults.buttonColors(containerColor = container, contentColor = content),
-        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 12.dp),
-        modifier = Modifier.width(144.dp),
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 12.dp),
+        modifier = modifier,
     ) {
-        Text(text, style = BodyBold.copy(color = Color.Unspecified), maxLines = 1)
+        Text(
+            text = text,
+            style = BodyBold.copy(color = Color.Unspecified, fontSize = 14.sp),
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 

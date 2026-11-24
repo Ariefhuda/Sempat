@@ -100,20 +100,25 @@ data class DonationFlowState(
     val weightUnit: WeightUnit = WeightUnit.KG,
     val selectedCategory: FoodCategory? = null,
     val selectedPhotoName: String? = null,
+    val selectedPhotoUri: String? = null,
     val pendingPhotoName: String? = null,
+    val pendingPhotoUri: String? = null,
     val checkResult: FoodCheckResult? = null,
     val recipientSort: RecipientSort = RecipientSort.NEAREST,
     val selectedRecipient: DonationRecipient? = null,
     val savedDonationId: String? = null
 ) {
+    val hasPhoto: Boolean
+        get() = !selectedPhotoUri.isNullOrBlank() || selectedPhotoName != null
+
     val isFormComplete: Boolean
-        get() = selectedPhotoName != null &&
+        get() = hasPhoto &&
             foodName.isNotBlank() &&
             weightInput.isNotBlank() &&
             selectedCategory != null
 
     val hasUnsavedInput: Boolean
-        get() = selectedPhotoName != null ||
+        get() = hasPhoto ||
             foodName.isNotBlank() ||
             weightInput.isNotBlank() ||
             selectedCategory != null

@@ -10,7 +10,8 @@ data class Donation(
     val pickupAddress: String,
     val distance: String,
     val imageName: String,
-    val status: String
+    val status: String,
+    val imageUri: String? = null
 )
 
 data class HomeNotice(
@@ -34,6 +35,7 @@ data class HomeData(
     val role: HomeRole,
     val donatedWeight: String = "",
     val sharedCount: String = "",
+    val pickupAddress: String = "",
     val selectedLocationId: String = "",
     val locations: List<PickupLocation> = emptyList(),
     val donations: List<Donation> = emptyList(),
@@ -62,5 +64,6 @@ data class FoodCheckResult(
     val shelfLife: String,
     val isEligible: Boolean,
     val recommendation: String,
-    val imageName: String
+    val imageName: String,
+    val imageUri: String? = null
 )

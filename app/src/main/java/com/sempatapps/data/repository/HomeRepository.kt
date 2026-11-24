@@ -29,6 +29,7 @@ interface HomeRepository {
     fun markNoticeRead(role: HomeRole, id: String)
     fun setNeedsHelp(enabled: Boolean)
     fun addDonation(donation: Donation, recipientName: String? = null)
+    fun markDonationAssigned(donation: Donation, recipientName: String) {}
 }
 
 @Singleton
@@ -39,6 +40,7 @@ class ApiHomeRepository @Inject constructor(
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val fallback = DummyHomeRepository()
+    private val localPhotoByKey = mutableMapOf<String, String>()
 
     override fun observe(role: HomeRole): StateFlow<HomeData> = fallback.observe(role)
 
@@ -50,6 +52,7 @@ class ApiHomeRepository @Inject constructor(
         runCatching {
             val profil = runCatching { api.profilSaya(token) }.getOrNull()
             val nama = profil?.nama?.ifBlank { displayName } ?: displayName
+            val alamatProfil = profil?.lokasi?.alamat?.takeIf { it.isNotBlank() }.orEmpty()
             val notices = runCatching { api.notifikasiSaya(token) }.getOrNull()?.map { it.toHomeNotice() }
 
             if (role == HomeRole.DONOR) {
@@ -61,6 +64,7 @@ class ApiHomeRepository @Inject constructor(
                     displayName = nama,
                     donatedWeight = formatWeightKg(totalAllGram),
                     sharedCount = formatWeightKg(totalSelesaiGram),
+                    pickupAddress = alamatProfil,
                     donations = donasiList.map { it.toDonation() },
                     notices = notices,
                 )
@@ -96,6 +100,10 @@ class ApiHomeRepository @Inject constructor(
     }
 
     override fun addDonation(donation: Donation, recipientName: String?) {
+        val photoUri = donation.imageUri
+        if (!photoUri.isNullOrBlank()) {
+            localPhotoByKey[photoKey(donation.name, donation.quantity)] = photoUri
+        }
         fallback.addDonation(donation, recipientName)
         scope.launch {
             val token = sessions.ambil()?.token ?: return@launch
@@ -116,10 +124,20 @@ class ApiHomeRepository @Inject constructor(
                 )
             }.getOrNull()
             if (created != null) {
+                if (!photoUri.isNullOrBlank()) {
+                    localPhotoByKey[created.id] = photoUri
+                }
                 refresh(HomeRole.DONOR)
             }
         }
     }
+
+    override fun markDonationAssigned(donation: Donation, recipientName: String) {
+        fallback.markDonationAssigned(donation, recipientName)
+    }
+
+    private fun photoKey(name: String, quantity: String): String =
+        "${name.trim().lowercase()}|${quantity.trim().lowercase()}"
 
     private fun DonasiDto.toDonation(): Donation {
         val statusLabel = when (status.uppercase()) {
@@ -133,6 +151,9 @@ class ApiHomeRepository @Inject constructor(
             kategori.contains("sayur", ignoreCase = true) || kategori.contains("buah", ignoreCase = true) -> "veggie_photo"
             else -> "bread_photo"
         }
+        val resolvedUri = fotoUrl?.takeIf { it.isNotBlank() }
+            ?: localPhotoByKey[id]
+            ?: localPhotoByKey[photoKey(nama, jumlah)]
         val jarak = jarakKm?.let { String.format(Locale.forLanguageTag("id-ID"), "%.1f km", it) } ?: "1,5 km"
         return Donation(
             id = id,
@@ -143,6 +164,7 @@ class ApiHomeRepository @Inject constructor(
             distance = jarak,
             imageName = imageName,
             status = statusLabel,
+            imageUri = resolvedUri,
         )
     }
 
@@ -244,6 +266,7 @@ class DummyHomeRepository : HomeRepository {
         displayName: String,
         donatedWeight: String,
         sharedCount: String,
+        pickupAddress: String,
         donations: List<Donation>,
         notices: List<HomeNotice>?,
     ) {
@@ -252,6 +275,7 @@ class DummyHomeRepository : HomeRepository {
                 displayName = displayName,
                 donatedWeight = donatedWeight,
                 sharedCount = sharedCount,
+                pickupAddress = pickupAddress.ifBlank { current.pickupAddress },
                 donations = donations,
                 notices = notices ?: current.notices,
             )
@@ -307,6 +331,29 @@ class DummyHomeRepository : HomeRepository {
                 id = "n_${donation.id}",
                 title = "Pangan Berhasil Didonasikan",
                 message = "$highlight berhasil didonasikan $targetText",
+                day = "Hari ini",
+                highlightText = highlight,
+                iconName = "donated"
+            )
+            data.copy(
+                donations = updatedList,
+                notices = listOf(newNotice) + data.notices.filterNot { it.id == newNotice.id }
+            )
+        }
+    }
+
+    override fun markDonationAssigned(donation: Donation, recipientName: String) {
+        donor.update { data ->
+            val updatedList = data.donations.map { item ->
+                val isSame = item.id == donation.id ||
+                    (item.name.equals(donation.name, ignoreCase = true) && item.quantity.equals(donation.quantity, ignoreCase = true))
+                if (isSame) item.copy(status = "Didonasikan") else item
+            }
+            val highlight = "${donation.name} ${donation.quantity}"
+            val newNotice = HomeNotice(
+                id = "n_assign_${donation.id}",
+                title = "Pangan Berhasil Didonasikan",
+                message = "$highlight berhasil didonasikan ke $recipientName",
                 day = "Hari ini",
                 highlightText = highlight,
                 iconName = "donated"

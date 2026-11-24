@@ -27,6 +27,7 @@ android {
         // Ganti tanpa ubah kode: tambahkan baris ini di local.properties
         //   sempat.apiUrl=https://api.domainkamu.com/
         buildConfigField("String", "API_URL", "\"${apiUrl()}\"")
+        buildConfigField("String", "GEMINI_API_KEY", "\"${geminiApiKey()}\"")
     }
 
     buildTypes {
@@ -126,4 +127,13 @@ fun apiUrl(): String {
     return local.getProperty("sempat.apiUrl")
         ?: providers.gradleProperty("sempat.apiUrl").orNull
         ?: "http://10.0.2.2:8080/"
+}
+
+fun geminiApiKey(): String {
+    val local = Properties()
+    rootProject.file("local.properties").takeIf { it.exists() }?.inputStream()?.use(local::load)
+    return local.getProperty("gemini.apiKey")
+        ?: local.getProperty("GEMINI_API_KEY")
+        ?: providers.gradleProperty("gemini.apiKey").orNull
+        ?: ""
 }

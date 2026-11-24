@@ -1,6 +1,27 @@
 package com.sempatapps.presentation.donation
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.core.ImageCapture
+import androidx.camera.core.ImageCaptureException
+import androidx.camera.view.CameraController
+import androidx.camera.view.LifecycleCameraController
+import androidx.camera.view.PreviewView
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import coil.compose.AsyncImage
+import com.sempatapps.ai.food.FoodAiAnalyzer
+import java.io.File
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -116,8 +137,10 @@ import kotlinx.coroutines.delay
 
 @Composable
 fun DonationFlowScreen(
+    defaultPickupAddress: String = "Alamat profil donatur",
     onCloseToHome: () -> Unit,
     onDonationCreated: (Donation, String?) -> Unit,
+    onRecipientAssigned: (Donation, String) -> Unit = { _, _ -> },
     onViewDonationDetail: (Donation) -> Unit
 ) {
     var state by remember { mutableStateOf(DonationFlowState()) }
@@ -129,10 +152,11 @@ fun DonationFlowScreen(
             name = state.foodName.ifBlank { "Roti Enak" },
             category = state.selectedCategory?.label ?: "Roti & Kue",
             quantity = state.compactWeight.ifBlank { "250g" },
-            pickupAddress = "Zahran Bakery, Medan",
+            pickupAddress = defaultPickupAddress,
             distance = state.selectedRecipient?.let { "${it.distanceKm} km" } ?: "1,5 km",
             imageName = state.selectedPhotoName ?: "bread_photo",
-            status = status
+            status = status,
+            imageUri = state.selectedPhotoUri
         )
     }
 
@@ -149,7 +173,8 @@ fun DonationFlowScreen(
             },
             isEligible = true,
             recommendation = "Kondisi pangan masih baik dan cocok didonasikan ke yang membutuhkan",
-            imageName = state.selectedPhotoName ?: "bread_photo"
+            imageName = state.selectedPhotoName ?: "bread_photo",
+            imageUri = state.selectedPhotoUri
         )
     }
 
@@ -185,25 +210,21 @@ fun DonationFlowScreen(
 
             DonationStep.CAMERA -> CameraCaptureScreen(
                 onBack = { state = state.copy(step = DonationStep.FORM) },
-                onCapturePhoto = { imageName ->
+                onPhotoReady = { uriString ->
                     state = state.copy(
-                        pendingPhotoName = imageName,
-                        step = DonationStep.PHOTO_PREVIEW
-                    )
-                },
-                onPickFromGallery = { imageName ->
-                    state = state.copy(
-                        pendingPhotoName = imageName,
+                        pendingPhotoUri = uriString,
                         step = DonationStep.PHOTO_PREVIEW
                     )
                 }
             )
 
             DonationStep.PHOTO_PREVIEW -> PhotoPreviewScreen(
-                imageName = state.pendingPhotoName ?: "bread_photo",
+                imageUri = state.pendingPhotoUri,
+                fallbackImageName = state.pendingPhotoName ?: "bread_photo",
                 onRetake = { state = state.copy(step = DonationStep.CAMERA) },
                 onContinue = {
                     state = state.copy(
+                        selectedPhotoUri = state.pendingPhotoUri,
                         selectedPhotoName = state.pendingPhotoName ?: "bread_photo",
                         step = DonationStep.FORM
                     )
@@ -211,17 +232,26 @@ fun DonationFlowScreen(
             )
 
             DonationStep.AI_CHECKING -> AiCheckingScreen(
-                onFinished = {
+                state = state,
+                onSuccess = { result ->
                     state = state.copy(
-                        checkResult = buildCheckResult(),
+                        checkResult = result,
                         step = DonationStep.RESULT
                     )
+                },
+                onBusy = {
+                    state = state.copy(step = DonationStep.AI_BUSY)
                 }
             )
 
             DonationStep.AI_BUSY -> AiBusyScreen(
                 onRetry = { state = state.copy(step = DonationStep.AI_CHECKING) },
-                onManualFill = { state = state.copy(step = DonationStep.FORM) }
+                onManualFill = {
+                    state = state.copy(
+                        checkResult = buildCheckResult(),
+                        step = DonationStep.RESULT
+                    )
+                }
             )
 
             DonationStep.RESULT -> FoodCheckResultScreen(
@@ -248,7 +278,7 @@ fun DonationFlowScreen(
                 onSortChange = { state = state.copy(recipientSort = it) },
                 onSelectRecipient = { recipient ->
                     val updated = buildDonation("Didonasikan")
-                    onDonationCreated(updated, recipient.name)
+                    onRecipientAssigned(updated, recipient.name)
                     state = state.copy(
                         selectedRecipient = recipient,
                         savedDonationId = updated.id,
@@ -376,7 +406,7 @@ private fun DonationFormScreen(
                 border = BorderStroke(1.dp, Primary),
                 shadowElevation = 2.dp
             ) {
-                if (state.selectedPhotoName == null) {
+                if (!state.hasPhoto) {
                     Column(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -405,11 +435,11 @@ private fun DonationFormScreen(
                     }
                 } else {
                     Box(modifier = Modifier.fillMaxSize()) {
-                        Image(
-                            painter = painterResource(photoRes(state.selectedPhotoName)),
+                        FoodPhotoImage(
+                            photoUri = state.selectedPhotoUri,
+                            fallbackName = state.selectedPhotoName ?: "bread_photo",
                             contentDescription = "Foto pangan",
-                            modifier = Modifier.fillMaxSize(),
-                            contentScale = ContentScale.Crop
+                            modifier = Modifier.fillMaxSize()
                         )
                         Box(
                             modifier = Modifier
@@ -660,29 +690,117 @@ private fun DonationInputBox(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun FoodPhotoImage(
+    photoUri: String?,
+    fallbackName: String,
+    contentDescription: String?,
+    modifier: Modifier = Modifier,
+) {
+    if (!photoUri.isNullOrBlank()) {
+        AsyncImage(
+            model = Uri.parse(photoUri),
+            contentDescription = contentDescription,
+            modifier = modifier,
+            contentScale = ContentScale.Crop,
+        )
+    } else {
+        Image(
+            painter = painterResource(photoRes(fallbackName)),
+            contentDescription = contentDescription,
+            modifier = modifier,
+            contentScale = ContentScale.Crop,
+        )
+    }
+}
+
 @Composable
 private fun CameraCaptureScreen(
     onBack: () -> Unit,
-    onCapturePhoto: (String) -> Unit,
-    onPickFromGallery: (String) -> Unit
+    onPhotoReady: (String) -> Unit
 ) {
-    var showGallerySheet by remember { mutableStateOf(false) }
-    var selectedGalleryOption by remember { mutableStateOf<GalleryPhotoOption?>(sampleGalleryPhotos.first()) }
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        // Simulated live camera viewfinder backdrop
-        Image(
-            painter = painterResource(R.drawable.bread_photo),
-            contentDescription = "Pratinjau kamera",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
         )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.12f))
-        )
+    }
+    var isCapturing by remember { mutableStateOf(false) }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        hasCameraPermission = granted
+    }
+
+    val galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        if (uri != null) {
+            onPhotoReady(uri.toString())
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        if (!hasCameraPermission) {
+            permissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
+    val controller = remember {
+        LifecycleCameraController(context).apply {
+            setEnabledUseCases(CameraController.IMAGE_CAPTURE)
+            imageCaptureMode = ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY
+        }
+    }
+
+    DisposableEffect(lifecycleOwner, hasCameraPermission) {
+        if (hasCameraPermission) {
+            controller.bindToLifecycle(lifecycleOwner)
+        }
+        onDispose {
+            controller.unbind()
+        }
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        if (hasCameraPermission) {
+            AndroidView(
+                factory = { ctx ->
+                    PreviewView(ctx).apply {
+                        scaleType = PreviewView.ScaleType.FILL_CENTER
+                        this.controller = controller
+                    }
+                },
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Izin kamera diperlukan untuk memotret pangan secara langsung.",
+                    color = Color.White,
+                    fontSize = 15.sp,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(Modifier.height(14.dp))
+                PrimaryButton(
+                    text = "Izinkan Kamera",
+                    onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) }
+                )
+            }
+        }
 
         // Top Bar
         DonationBackHeader(
@@ -692,30 +810,28 @@ private fun CameraCaptureScreen(
         )
 
         // Green Scan Corner Brackets (Figma "Scan Foto")
-        Canvas(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(bottom = 80.dp)
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .height(440.dp)
-        ) {
-            val stroke = 4.dp.toPx()
-            val cornerLen = 46.dp.toPx()
-            val bracketColor = Primary
+        if (hasCameraPermission) {
+            Canvas(
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(bottom = 80.dp)
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp)
+                    .height(440.dp)
+            ) {
+                val stroke = 4.dp.toPx()
+                val cornerLen = 46.dp.toPx()
+                val bracketColor = Primary
 
-            // Top-left
-            drawLine(bracketColor, Offset(0f, 0f), Offset(cornerLen, 0f), strokeWidth = stroke, cap = StrokeCap.Round)
-            drawLine(bracketColor, Offset(0f, 0f), Offset(0f, cornerLen), strokeWidth = stroke, cap = StrokeCap.Round)
-            // Top-right
-            drawLine(bracketColor, Offset(size.width - cornerLen, 0f), Offset(size.width, 0f), strokeWidth = stroke, cap = StrokeCap.Round)
-            drawLine(bracketColor, Offset(size.width, 0f), Offset(size.width, cornerLen), strokeWidth = stroke, cap = StrokeCap.Round)
-            // Bottom-left
-            drawLine(bracketColor, Offset(0f, size.height - cornerLen), Offset(0f, size.height), strokeWidth = stroke, cap = StrokeCap.Round)
-            drawLine(bracketColor, Offset(0f, size.height), Offset(cornerLen, size.height), strokeWidth = stroke, cap = StrokeCap.Round)
-            // Bottom-right
-            drawLine(bracketColor, Offset(size.width, size.height - cornerLen), Offset(size.width, size.height), strokeWidth = stroke, cap = StrokeCap.Round)
-            drawLine(bracketColor, Offset(size.width - cornerLen, size.height), Offset(size.width, size.height), strokeWidth = stroke, cap = StrokeCap.Round)
+                drawLine(bracketColor, Offset(0f, 0f), Offset(cornerLen, 0f), strokeWidth = stroke, cap = StrokeCap.Round)
+                drawLine(bracketColor, Offset(0f, 0f), Offset(0f, cornerLen), strokeWidth = stroke, cap = StrokeCap.Round)
+                drawLine(bracketColor, Offset(size.width - cornerLen, 0f), Offset(size.width, 0f), strokeWidth = stroke, cap = StrokeCap.Round)
+                drawLine(bracketColor, Offset(size.width, 0f), Offset(size.width, cornerLen), strokeWidth = stroke, cap = StrokeCap.Round)
+                drawLine(bracketColor, Offset(0f, size.height - cornerLen), Offset(0f, size.height), strokeWidth = stroke, cap = StrokeCap.Round)
+                drawLine(bracketColor, Offset(0f, size.height), Offset(cornerLen, size.height), strokeWidth = stroke, cap = StrokeCap.Round)
+                drawLine(bracketColor, Offset(size.width, size.height - cornerLen), Offset(size.width, size.height), strokeWidth = stroke, cap = StrokeCap.Round)
+                drawLine(bracketColor, Offset(size.width - cornerLen, size.height), Offset(size.width, size.height), strokeWidth = stroke, cap = StrokeCap.Round)
+            }
         }
 
         // Bottom Controls
@@ -725,9 +841,13 @@ private fun CameraCaptureScreen(
                 .fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Pilih dari Galeri pill button
+            // Pilih dari Galeri (Android Photo Picker)
             Button(
-                onClick = { showGallerySheet = true },
+                onClick = {
+                    galleryLauncher.launch(
+                        PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                    )
+                },
                 modifier = Modifier
                     .width(222.dp)
                     .height(44.dp),
@@ -753,7 +873,6 @@ private fun CameraCaptureScreen(
 
             Spacer(Modifier.height(10.dp))
 
-            // Warning Banner
             CameraTipBanner(
                 text = "Pastikan foto yang kamu ambil terlihat jelas agar SEMPAT dapat medeteksi dengan baik",
                 modifier = Modifier.padding(horizontal = 20.dp)
@@ -780,100 +899,45 @@ private fun CameraCaptureScreen(
                             .size(width = 81.dp, height = 76.dp)
                             .clip(CircleShape)
                             .background(Primary)
-                            .clickable { onCapturePhoto("bread_photo") },
+                            .clickable(enabled = hasCameraPermission && !isCapturing) {
+                                isCapturing = true
+                                val photoFile = File(context.cacheDir, "pangan_${System.currentTimeMillis()}.jpg")
+                                val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+                                controller.takePicture(
+                                    outputOptions,
+                                    ContextCompat.getMainExecutor(context),
+                                    object : ImageCapture.OnImageSavedCallback {
+                                        override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
+                                            isCapturing = false
+                                            val savedUri = outputFileResults.savedUri ?: Uri.fromFile(photoFile)
+                                            onPhotoReady(savedUri.toString())
+                                        }
+
+                                        override fun onError(exception: ImageCaptureException) {
+                                            isCapturing = false
+                                            Toast.makeText(context, "Gagal mengambil foto, coba lagi", Toast.LENGTH_SHORT).show()
+                                        }
+                                    }
+                                )
+                            },
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.CameraAlt,
-                            contentDescription = "Ambil foto",
-                            tint = Color.White,
-                            modifier = Modifier.size(44.dp)
-                        )
-                    }
-                }
-            }
-        }
-    }
-
-    if (showGallerySheet) {
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        ModalBottomSheet(
-            onDismissRequest = { showGallerySheet = false },
-            sheetState = sheetState,
-            containerColor = SurfaceLight,
-            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
-            dragHandle = {
-                Box(
-                    modifier = Modifier
-                        .padding(top = 12.dp, bottom = 10.dp)
-                        .width(140.dp)
-                        .height(8.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Primary)
-                )
-            }
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(430.dp)
-            ) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(3),
-                    horizontalArrangement = Arrangement.spacedBy(3.dp),
-                    verticalArrangement = Arrangement.spacedBy(3.dp),
-                    contentPadding = PaddingValues(bottom = 86.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    items(sampleGalleryPhotos) { option ->
-                        val isSelected = selectedGalleryOption?.id == option.id
-                        Box(
-                            modifier = Modifier
-                                .aspectRatio(0.86f)
-                                .clickable { selectedGalleryOption = option }
-                        ) {
-                            Image(
-                                painter = painterResource(option.drawableRes),
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
+                        if (isCapturing) {
+                            CircularProgressIndicator(
+                                color = Color.White,
+                                strokeWidth = 3.dp,
+                                modifier = Modifier.size(32.dp)
                             )
-                            Box(
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .padding(8.dp)
-                                    .size(28.dp)
-                                    .clip(CircleShape)
-                                    .background(if (isSelected) Primary else Color.White.copy(alpha = 0.85f))
-                                    .border(2.dp, Primary, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (isSelected) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Check,
-                                        contentDescription = "Dipilih",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                }
-                            }
+                        } else {
+                            Icon(
+                                imageVector = Icons.Rounded.CameraAlt,
+                                contentDescription = "Ambil foto",
+                                tint = Color.White,
+                                modifier = Modifier.size(44.dp)
+                            )
                         }
                     }
                 }
-
-                SecondaryButton(
-                    text = "Pilih Foto",
-                    onClick = {
-                        val chosen = selectedGalleryOption ?: sampleGalleryPhotos.first()
-                        showGallerySheet = false
-                        onPickFromGallery(chosen.imageName)
-                    },
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .navigationBarsPadding()
-                        .padding(bottom = 16.dp)
-                        .width(179.dp)
-                )
             }
         }
     }
@@ -910,16 +974,17 @@ private fun CameraTipBanner(text: String, modifier: Modifier = Modifier) {
 
 @Composable
 private fun PhotoPreviewScreen(
-    imageName: String,
+    imageUri: String?,
+    fallbackImageName: String,
     onRetake: () -> Unit,
     onContinue: () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        Image(
-            painter = painterResource(photoRes(imageName)),
+        FoodPhotoImage(
+            photoUri = imageUri,
+            fallbackName = fallbackImageName,
             contentDescription = "Pratinjau foto pangan",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
+            modifier = Modifier.fillMaxSize()
         )
 
         CameraTipBanner(
@@ -954,11 +1019,25 @@ private fun PhotoPreviewScreen(
 
 @Composable
 private fun AiCheckingScreen(
-    onFinished: () -> Unit
+    state: DonationFlowState,
+    onSuccess: (FoodCheckResult) -> Unit,
+    onBusy: () -> Unit
 ) {
-    LaunchedEffect(Unit) {
-        delay(1800)
-        onFinished()
+    val context = LocalContext.current
+    LaunchedEffect(state.selectedPhotoUri, state.foodName, state.weightInput, state.selectedCategory) {
+        val fallbackName = state.selectedPhotoName ?: "bread_photo"
+        val result = runCatching {
+            FoodAiAnalyzer.analyzeFood(
+                context = context,
+                foodName = state.foodName.ifBlank { "Pangan Surplus" },
+                category = state.selectedCategory?.label ?: "Lainnya",
+                weightLabel = state.formattedWeight.ifBlank { "250gram" },
+                imageUri = state.selectedPhotoUri,
+                fallbackDrawableRes = photoRes(fallbackName),
+                fallbackImageName = fallbackName,
+            )
+        }
+        result.onSuccess(onSuccess).onFailure { onBusy() }
     }
 
     val infiniteTransition = rememberInfiniteTransition(label = "ai_spinner")
@@ -1123,15 +1202,15 @@ private fun FoodCheckResultScreen(
                     shadowElevation = 6.dp
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
-                        Image(
-                            painter = painterResource(photoRes(result.imageName)),
+                        FoodPhotoImage(
+                            photoUri = result.imageUri,
+                            fallbackName = result.imageName,
                             contentDescription = result.name,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(202.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .border(1.dp, Primary, RoundedCornerShape(12.dp)),
-                            contentScale = ContentScale.Crop
+                                .border(1.dp, Primary, RoundedCornerShape(12.dp))
                         )
                         Spacer(Modifier.height(16.dp))
                         ResultRow("Nama Pangan", result.name)
@@ -1166,10 +1245,10 @@ private fun FoodCheckResultScreen(
                         ResultRow("Masa Tahan", result.shelfLife)
                         Spacer(Modifier.height(20.dp))
 
-                        // LAYAK DIDONASIKAN badge
+                        // Badge kelayakan donasi
                         Surface(
                             shape = RoundedCornerShape(6.dp),
-                            color = SecondaryDark
+                            color = if (result.isEligible) SecondaryDark else Color(0xFFB3261E)
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
@@ -1177,13 +1256,13 @@ private fun FoodCheckResultScreen(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Rounded.ThumbUp,
+                                    imageVector = if (result.isEligible) Icons.Rounded.ThumbUp else Icons.Rounded.Error,
                                     contentDescription = null,
                                     tint = PaleTeal,
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Text(
-                                    text = "LAYAK DIDONASIKAN",
+                                    text = if (result.isEligible) "LAYAK DIDONASIKAN" else "PERLU DIPERIKSA ULANG",
                                     color = PaleTeal,
                                     fontSize = 14.sp,
                                     fontWeight = FontWeight.Bold
@@ -1224,11 +1303,17 @@ private fun FoodCheckResultScreen(
                             Spacer(Modifier.height(2.dp))
                             Text(
                                 text = buildAnnotatedString {
-                                    append("Kondisi pangan masih baik dan cocok ")
-                                    withStyle(SpanStyle(color = Primary, fontWeight = FontWeight.Medium)) {
-                                        append("didonasikan")
+                                    val rec = result.recommendation
+                                    val idx = rec.indexOf("didonasikan", ignoreCase = true)
+                                    if (idx >= 0) {
+                                        append(rec.substring(0, idx))
+                                        withStyle(SpanStyle(color = Primary, fontWeight = FontWeight.Medium)) {
+                                            append(rec.substring(idx, idx + "didonasikan".length))
+                                        }
+                                        append(rec.substring(idx + "didonasikan".length))
+                                    } else {
+                                        append(rec)
                                     }
-                                    append(" ke yang membutuhkan")
                                 },
                                 color = Ink,
                                 fontSize = 14.sp,

@@ -121,22 +121,31 @@ internal fun DonorHome(
                     Spacer(Modifier.weight(1f))
                     NoticeButton(data.notices.count { !it.isRead }, onNotices)
                 }
-                Spacer(Modifier.height(34.dp))
-                Text("Halo ,", color = Color.White, fontSize = 20.sp, modifier = Modifier.padding(start = 18.dp))
+                Spacer(Modifier.height(28.dp))
+                Text("Halo ,", color = Color.White, fontFamily = Figtree, fontSize = 20.sp, modifier = Modifier.padding(start = 18.dp))
                 Text(
                     data.displayName,
                     color = Color.White,
-                    fontSize = 26.sp,
+                    fontFamily = Sora,
+                    fontSize = 22.sp,
+                    lineHeight = 28.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    modifier = Modifier.padding(start = 18.dp)
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .fillMaxWidth(0.54f)
+                        .padding(start = 18.dp)
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
                     "Yuk, kelola pangan\nsurplusmu hari ini.",
                     color = Color.White,
+                    fontFamily = Figtree,
                     fontSize = 15.sp,
                     lineHeight = 22.sp,
-                    modifier = Modifier.padding(start = 18.dp)
+                    modifier = Modifier
+                        .fillMaxWidth(0.56f)
+                        .padding(start = 18.dp)
                 )
             }
         }
@@ -237,20 +246,23 @@ private fun ImpactValue(symbol: Int, value: String, label: String, modifier: Mod
             )
             Spacer(Modifier.width(8.dp))
             Column {
+                val numPart = parts.firstOrNull().orEmpty()
+                val numSize = if (numPart.length >= 5) 17.sp else 22.sp
                 Text(
                     text = buildAnnotatedString {
-                        withStyle(SpanStyle(fontFamily = Sora, fontSize = 22.sp, fontWeight = FontWeight.ExtraBold)) {
-                            append(parts.firstOrNull().orEmpty())
+                        withStyle(SpanStyle(fontFamily = Sora, fontSize = numSize, fontWeight = FontWeight.ExtraBold)) {
+                            append(numPart)
                         }
                         if (parts.size > 1) {
                             append(" ")
-                            withStyle(SpanStyle(fontFamily = Figtree, fontSize = 14.sp, fontWeight = FontWeight.Bold)) {
+                            withStyle(SpanStyle(fontFamily = Figtree, fontSize = 13.sp, fontWeight = FontWeight.Bold)) {
                                 append(parts[1])
                             }
                         }
                     },
                     color = PrimaryDark,
-                    maxLines = 1
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 Text(label, color = Ink, fontFamily = Figtree, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }

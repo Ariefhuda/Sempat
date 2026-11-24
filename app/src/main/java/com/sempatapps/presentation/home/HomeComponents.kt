@@ -67,8 +67,10 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import kotlinx.coroutines.launch
+import android.net.Uri
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.ui.text.style.TextDecoration
+import coil.compose.AsyncImage
 import com.sempatapps.R
 import com.sempatapps.core.designsystem.*
 import com.sempatapps.core.designsystem.component.BackButton
@@ -124,13 +126,11 @@ internal fun DonorActivityCard(donation: Donation, onClick: () -> Unit) {
             elevation = CardDefaults.cardElevation(4.dp)
         ) {
             Column {
-                Image(
-                    painter = painterResource(photoRes(donation.imageName)),
-                    contentDescription = donation.name,
+                DonationThumbnail(
+                    donation = donation,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(99.dp),
-                    contentScale = ContentScale.Crop
+                        .height(99.dp)
                 )
                 Column(
                     modifier = Modifier
@@ -221,7 +221,10 @@ internal fun DonationCard(donation: Donation, showStatus: Boolean, onClick: () -
 internal fun RecommendationCard(donation: Donation, onClick: () -> Unit) {
     Card(Modifier.fillMaxWidth().clickable(onClick = onClick), shape = RoundedCornerShape(13.dp), colors = CardDefaults.cardColors(containerColor = Color.White), elevation = CardDefaults.cardElevation(2.dp)) {
         Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
-            Image(painterResource(photoRes(donation.imageName)), contentDescription = donation.name, modifier = Modifier.size(106.dp).clip(RoundedCornerShape(10.dp)), contentScale = ContentScale.Crop)
+            DonationThumbnail(
+                donation = donation,
+                modifier = Modifier.size(106.dp).clip(RoundedCornerShape(10.dp))
+            )
             Spacer(Modifier.width(12.dp))
             Column {
                 Text(donation.category, color = Muted, fontSize = 11.sp)
@@ -231,6 +234,25 @@ internal fun RecommendationCard(donation: Donation, onClick: () -> Unit) {
                 Text("Gratis · Ambil sendiri", color = DarkTeal, fontWeight = FontWeight.Bold, fontSize = 13.sp)
             }
         }
+    }
+}
+
+@Composable
+internal fun DonationThumbnail(donation: Donation, modifier: Modifier = Modifier) {
+    if (!donation.imageUri.isNullOrBlank()) {
+        AsyncImage(
+            model = Uri.parse(donation.imageUri),
+            contentDescription = donation.name,
+            modifier = modifier,
+            contentScale = ContentScale.Crop
+        )
+    } else {
+        Image(
+            painter = painterResource(photoRes(donation.imageName)),
+            contentDescription = donation.name,
+            modifier = modifier,
+            contentScale = ContentScale.Crop
+        )
     }
 }
 
