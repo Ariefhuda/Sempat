@@ -46,6 +46,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.sempatapps.R
 import com.sempatapps.core.designsystem.Body
+import com.sempatapps.core.designsystem.BodyBold
 import com.sempatapps.core.designsystem.Canvas
 import com.sempatapps.core.designsystem.Heading2
 import com.sempatapps.core.designsystem.Ink
@@ -139,7 +140,10 @@ private fun FotoKtpContent(
         Text("Foto KTP", style = Title, color = PrimaryDark)
         Text("Data dibaca di HP ini. Foto KTP tidak dikirim ke server.", style = Body, modifier = Modifier.width(254.dp))
 
-        Spacer(Modifier.height(10.dp))
+        Spacer(Modifier.height(14.dp))
+        PanduanFoto()
+
+        Spacer(Modifier.height(14.dp))
         KartuAmbilFoto(statusScan = statusScan, onClick = onAmbilFoto)
 
         if (statusScan == StatusScan.GAGAL) {
@@ -162,6 +166,32 @@ private fun FotoKtpContent(
                     .background(PrimaryLightActive),
             ) {
                 Text("Data akun terisi otomatis dari KTP", style = Body, color = PrimaryDark, textAlign = TextAlign.Center)
+            }
+        }
+    }
+}
+
+/** Tiga hal yang paling sering bikin KTP tidak terbaca. */
+@Composable
+private fun PanduanFoto() {
+    val langkah = listOf(
+        "Letakkan KTP di atas meja dengan cahaya terang",
+        "Pastikan semua tulisan terlihat jelas, tidak terpotong",
+        "Hindari pantulan lampu atau kilatan kamera",
+    )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(PrimaryLightActive)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        Text("Biar KTP cepat terbaca", style = BodyBold, color = PrimaryDark)
+        langkah.forEach { teks ->
+            Row(verticalAlignment = Alignment.Top) {
+                Text("•  ", style = Body, color = PrimaryDark)
+                Text(teks, style = Body, color = Ink)
             }
         }
     }

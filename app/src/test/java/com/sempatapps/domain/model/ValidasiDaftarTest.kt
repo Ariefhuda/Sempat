@@ -52,6 +52,7 @@ class ValidasiDaftarTest {
 
     @Test
     fun `KTP kosong (isi manual) semua kolom ditandai`() {
-        assertEquals(KtpField.entries.toSet(), kolomKtpSalah(KtpData(), hariIni))
+        // Alamat opsional, jadi tidak ikut dianggap wajib.
+        assertEquals(setOf(KtpField.NIK, KtpField.NAMA, KtpField.TANGGAL_LAHIR, KtpField.KABUPATEN_KOTA), kolomKtpSalah(KtpData(), hariIni))
     }
 }

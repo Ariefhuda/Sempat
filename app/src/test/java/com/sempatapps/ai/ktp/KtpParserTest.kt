@@ -37,7 +37,7 @@ class KtpParserTest {
 
     @Test
     fun `hanya kolom yang dipakai form yang perlu di-OCR`() {
-        assertEquals(setOf("nik", "name", "birth", "province_city"), KtpParser.LABEL_DIPAKAI)
+        assertEquals(setOf("nik", "name", "birth", "province_city", "address", "rt_rw", "subdistrict", "district"), KtpParser.LABEL_DIPAKAI)
     }
 
     @Test

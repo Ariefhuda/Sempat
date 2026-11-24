@@ -6,6 +6,7 @@ enum class KtpField {
     NAMA,
     TANGGAL_LAHIR,
     KABUPATEN_KOTA,
+    ALAMAT,
 }
 
 /**
@@ -25,5 +26,9 @@ data class KtpData(
     val tanggalLahir: String = "",
     /** Mis. "KOTA MEDAN" atau "KABUPATEN KATINGAN". */
     val kabupatenKota: String = "",
+    /** Alamat jalan dari KTP, mis. "JL SETIA BUDI NO 5, RT/RW 001/002". Opsional, tidak wajib. */
+    val alamat: String = "",
+    val kelurahan: String = "",
+    val kecamatan: String = "",
     val perluDicek: Set<KtpField> = emptySet(),
 )
